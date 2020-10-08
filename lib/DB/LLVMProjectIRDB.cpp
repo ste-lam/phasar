@@ -27,7 +27,7 @@
 #include "boost/filesystem.hpp"
 
 #include "phasar/Config/Configuration.h"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/LLVMZeroValue.h"
 #include "phasar/PhasarLLVM/Passes/GeneralStatisticsAnalysis.h"
 #include "phasar/PhasarLLVM/Passes/ValueAnnotationPass.h"
@@ -43,7 +43,7 @@ using namespace std;
 
 namespace psr {
 
-ProjectIRDB::ProjectIRDB(IRDBOptions Options) : Options(Options) {
+LLVMProjectIRDB::LLVMProjectIRDB(IRDBOptions Options) : Options(Options) {
   // register the GeneralStaticsPass analysis pass to the ModuleAnalysisManager
   // such that we can query its results later on
   GeneralStatisticsAnalysis GSP;
@@ -55,9 +55,9 @@ ProjectIRDB::ProjectIRDB(IRDBOptions Options) : Options(Options) {
   MPM.addPass(llvm::VerifierPass());
 }
 
-ProjectIRDB::ProjectIRDB(const std::vector<std::string> &IRFiles,
+LLVMProjectIRDB::LLVMProjectIRDB(const std::vector<std::string> &IRFiles,
                          IRDBOptions Options)
-    : ProjectIRDB(Options | IRDBOptions::OWNS) {
+    : LLVMProjectIRDB(Options | IRDBOptions::OWNS) {
   for (const auto &File : IRFiles) {
     // if we have a file that is already compiled to llvm ir
     if ((File.find(".ll") != std::basic_string<char, std::char_traits<char>,
@@ -92,9 +92,9 @@ ProjectIRDB::ProjectIRDB(const std::vector<std::string> &IRFiles,
   preprocessAllModules();
 }
 
-ProjectIRDB::ProjectIRDB(const std::vector<llvm::Module *> &Modules,
+LLVMProjectIRDB::LLVMProjectIRDB(const std::vector<llvm::Module *> &Modules,
                          IRDBOptions Options)
-    : ProjectIRDB(Options) {
+    : LLVMProjectIRDB(Options) {
   for (auto *M : Modules) {
     insertModule(M);
   }
@@ -103,7 +103,7 @@ ProjectIRDB::ProjectIRDB(const std::vector<llvm::Module *> &Modules,
   }
 }
 
-ProjectIRDB::~ProjectIRDB() {
+LLVMProjectIRDB::~LLVMProjectIRDB() {
   // release resources if IRDB does not own
   if (!(Options & IRDBOptions::OWNS)) {
     for (auto &Context : Contexts) {
@@ -116,7 +116,7 @@ ProjectIRDB::~ProjectIRDB() {
   MAM.clear();
 }
 
-void ProjectIRDB::preprocessModule(llvm::Module *M) {
+void LLVMProjectIRDB::preprocessModule(llvm::Module *M) {
   PAMM_GET_INSTANCE;
   // add moduleID to timer name if performing MWA!
   START_TIMER("LLVM Passes", PAMM_SEVERITY_LEVEL::Full);
@@ -135,7 +135,7 @@ void ProjectIRDB::preprocessModule(llvm::Module *M) {
   buildIDModuleMapping(M);
 }
 
-void ProjectIRDB::linkForWPA() {
+void LLVMProjectIRDB::linkForWPA() {
   // Linking llvm modules:
   // Unfortunately linking between different contexts is currently not possible.
   // Therefore we must load all modules into one single context and then perform
@@ -200,20 +200,20 @@ void ProjectIRDB::linkForWPA() {
   }
 }
 
-void ProjectIRDB::preprocessAllModules() {
+void LLVMProjectIRDB::preprocessAllModules() {
   for (auto &[File, Module] : Modules) {
     preprocessModule(Module.get());
   }
 }
 
-llvm::Module *ProjectIRDB::getWPAModule() {
+llvm::Module *LLVMProjectIRDB::getWPAModule() {
   if (!WPAModule) {
     linkForWPA();
   }
   return WPAModule;
 }
 
-void ProjectIRDB::buildIDModuleMapping(llvm::Module *M) {
+void LLVMProjectIRDB::buildIDModuleMapping(llvm::Module *M) {
   for (auto &F : *M) {
     for (auto &BB : F) {
       for (auto &I : BB) {
@@ -223,21 +223,21 @@ void ProjectIRDB::buildIDModuleMapping(llvm::Module *M) {
   }
 }
 
-llvm::Module *ProjectIRDB::getModule(const std::string &ModuleName) {
+llvm::Module *LLVMProjectIRDB::getModule(const std::string &ModuleName) {
   if (Modules.count(ModuleName)) {
     return Modules[ModuleName].get();
   }
   return nullptr;
 }
 
-llvm::Instruction *ProjectIRDB::getInstruction(std::size_t Id) {
+llvm::Instruction *LLVMProjectIRDB::getInstruction(std::size_t Id) {
   if (IDInstructionMapping.count(Id)) {
     return IDInstructionMapping[Id];
   }
   return nullptr;
 }
 
-std::size_t ProjectIRDB::getInstructionID(const llvm::Instruction *I) {
+std::size_t LLVMProjectIRDB::getInstructionID(const llvm::Instruction *I) {
   std::size_t Id = 0;
   if (auto *MD = llvm::cast<llvm::MDString>(
           I->getMetadata(PhasarConfig::MetaDataKind())->getOperand(0))) {
@@ -246,14 +246,14 @@ std::size_t ProjectIRDB::getInstructionID(const llvm::Instruction *I) {
   return Id;
 }
 
-void ProjectIRDB::print() const {
+void LLVMProjectIRDB::print() const {
   for (const auto &[File, Module] : Modules) {
     std::cout << "Module: " << File << std::endl;
     llvm::outs() << *Module;
   }
 }
 
-void ProjectIRDB::emitPreprocessedIR(std::ostream &OS, bool ShortenIR) const {
+void LLVMProjectIRDB::emitPreprocessedIR(std::ostream &OS, bool ShortenIR) const {
   for (const auto &[File, Module] : Modules) {
     OS << "IR module: " << File << '\n';
     // print globals
@@ -297,7 +297,7 @@ void ProjectIRDB::emitPreprocessedIR(std::ostream &OS, bool ShortenIR) const {
 }
 
 const llvm::Function *
-ProjectIRDB::getFunctionDefinition(const string &FunctionName) const {
+LLVMProjectIRDB::getFunctionDefinition(const string &FunctionName) const {
   for (const auto &[File, Module] : Modules) {
     auto *F = Module->getFunction(FunctionName);
     if (F && !F->isDeclaration()) {
@@ -308,7 +308,7 @@ ProjectIRDB::getFunctionDefinition(const string &FunctionName) const {
 }
 
 const llvm::Function *
-ProjectIRDB::getFunction(const std::string &FunctionName) const {
+LLVMProjectIRDB::getFunction(const std::string &FunctionName) const {
   for (const auto &[File, Module] : Modules) {
     auto *F = Module->getFunction(FunctionName);
     if (F) {
@@ -318,7 +318,7 @@ ProjectIRDB::getFunction(const std::string &FunctionName) const {
   return nullptr;
 }
 
-const llvm::GlobalVariable *ProjectIRDB::getGlobalVariableDefinition(
+const llvm::GlobalVariable *LLVMProjectIRDB::getGlobalVariableDefinition(
     const std::string &GlobalVariableName) const {
   for (const auto &[File, Module] : Modules) {
     auto *G = Module->getGlobalVariable(GlobalVariableName);
@@ -330,7 +330,7 @@ const llvm::GlobalVariable *ProjectIRDB::getGlobalVariableDefinition(
 }
 
 llvm::Module *
-ProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) {
+LLVMProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) {
   for (auto &[File, Module] : Modules) {
     auto *F = Module->getFunction(FunctionName);
     if (F && !F->isDeclaration()) {
@@ -341,7 +341,7 @@ ProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) {
 }
 
 const llvm::Module *
-ProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) const {
+LLVMProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) const {
   for (const auto &[File, Module] : Modules) {
     auto *F = Module->getFunction(FunctionName);
     if (F && !F->isDeclaration()) {
@@ -351,7 +351,7 @@ ProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) const {
   return nullptr;
 }
 
-std::string ProjectIRDB::valueToPersistedString(const llvm::Value *V) {
+std::string LLVMProjectIRDB::valueToPersistedString(const llvm::Value *V) {
   if (LLVMZeroValue::getInstance()->isLLVMZeroValue(V)) {
     return LLVMZeroValue::getInstance()->getName();
   } else if (const auto *I = llvm::dyn_cast<llvm::Instruction>(V)) {
@@ -392,7 +392,7 @@ std::string ProjectIRDB::valueToPersistedString(const llvm::Value *V) {
 }
 
 const llvm::Value *
-ProjectIRDB::persistedStringToValue(const std::string &S) const {
+LLVMProjectIRDB::persistedStringToValue(const std::string &S) const {
   if (S.find(LLVMZeroValue::getInstance()->getName()) != std::string::npos) {
     return LLVMZeroValue::getInstance();
   } else if (S.find('.') == std::string::npos) {
@@ -434,7 +434,7 @@ ProjectIRDB::persistedStringToValue(const std::string &S) const {
   return nullptr;
 }
 
-std::set<const llvm::Function *> ProjectIRDB::getAllFunctions() const {
+std::set<const llvm::Function *> LLVMProjectIRDB::getAllFunctions() const {
   std::set<const llvm::Function *> Functions;
   for (const auto &[File, Module] : Modules) {
     for (auto &F : *Module) {
@@ -444,14 +444,14 @@ std::set<const llvm::Function *> ProjectIRDB::getAllFunctions() const {
   return Functions;
 }
 
-void ProjectIRDB::insertModule(llvm::Module *M) {
+void LLVMProjectIRDB::insertModule(llvm::Module *M) {
   Contexts.push_back(std::unique_ptr<llvm::LLVMContext>(&M->getContext()));
   Modules.insert(std::make_pair(M->getModuleIdentifier(), M));
   preprocessModule(M);
 }
 
 std::set<const llvm::StructType *>
-ProjectIRDB::getAllocatedStructTypes() const {
+LLVMProjectIRDB::getAllocatedStructTypes() const {
   std::set<const llvm::StructType *> StructTypes;
   for (const auto *Ty : AllocatedTypes) {
     if (const auto *StructTy = llvm::dyn_cast<llvm::StructType>(Ty)) {
@@ -461,7 +461,7 @@ ProjectIRDB::getAllocatedStructTypes() const {
   return StructTypes;
 }
 
-set<const llvm::Value *> ProjectIRDB::getAllMemoryLocations() const {
+set<const llvm::Value *> LLVMProjectIRDB::getAllMemoryLocations() const {
   // get all stack and heap alloca instructions
   auto AllocaInsts = getAllocaInstructions();
   set<const llvm::Value *> AllMemoryLoc;
@@ -489,7 +489,7 @@ set<const llvm::Value *> ProjectIRDB::getAllMemoryLocations() const {
   return AllMemoryLoc;
 }
 
-bool ProjectIRDB::debugInfoAvailable() const {
+bool LLVMProjectIRDB::hasDebugInfo() const {
   if (WPAModule) {
     return wasCompiledWithDebugInfo(WPAModule);
   }

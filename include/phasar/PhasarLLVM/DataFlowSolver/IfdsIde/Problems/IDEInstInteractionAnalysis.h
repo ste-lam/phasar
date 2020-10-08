@@ -895,7 +895,7 @@ public:
                       std::ostream &OS = std::cout) override {
     OS << "\n====================== IDE-Inst-Interaction-Analysis Report "
           "======================\n";
-    // if (!IRDB->debugInfoAvailable()) {
+    // if (!IRDB->hasDebugInfo()) {
     //   // Emit only IR code, function name and module info
     //   OS << "\nWARNING: No Debug Info available - emiting results without "
     //         "source code mapping!\n";

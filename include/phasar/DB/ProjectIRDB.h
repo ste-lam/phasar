@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2017 Philipp Schubert.
+ * Copyright (c) 2020 Philipp Schubert.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of LICENSE.txt.
  *
@@ -11,200 +11,120 @@
 #define PHASAR_DB_PROJECTIRDB_H_
 
 #include <iostream>
-#include <map>
-#include <memory>
 #include <set>
 #include <string>
-#include <vector>
-
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/PassManager.h"
-#include "llvm/Passes/PassBuilder.h"
-
-#include "phasar/Utils/EnumFlags.h"
-
-namespace llvm {
-class Value;
-class Instruction;
-class Type;
-class Function;
-class GlobalVariable;
-} // namespace llvm
 
 namespace psr {
 
+/// Specifies the IRDB options available.
 enum class IRDBOptions : uint32_t { NONE = 0, WPA = (1 << 0), OWNS = (1 << 1) };
 
-/**
- * This class owns the LLVM IR code of the project under analysis and some
- * very important information associated with the IR.
- * When an object of this class is destroyed it will clean up all IR related
- * stuff that is stored in it.
- */
+/// This class owns the IR code of the project under analysis and some
+/// very important information associated with the IR.
+/// When an object of this class is destroyed it will clean up all IR related
+/// stuff that is stored in it.
+///
+/// M - module type
+/// F - function type
+/// N - instruction type
+/// G - global variable type
+/// T - data type type
+/// V - value type
+///
+template <typename M, typename F, typename N, typename G, typename T,
+          typename V>
 class ProjectIRDB {
-private:
-  llvm::Module *WPAModule = nullptr;
-  IRDBOptions Options;
-  llvm::PassBuilder PB;
-  llvm::ModuleAnalysisManager MAM;
-  llvm::ModulePassManager MPM;
-  // Stores all allocation instructions
-  std::set<const llvm::Instruction *> AllocaInstructions;
-  // Stores all allocated types
-  std::set<const llvm::Type *> AllocatedTypes;
-  // Return or resum instructions
-  std::set<const llvm::Instruction *> RetOrResInstructions;
-  // Stores the contexts
-  std::vector<std::unique_ptr<llvm::LLVMContext>> Contexts;
-  // Contains all modules that correspond to a project and owns them
-  std::map<std::string, std::unique_ptr<llvm::Module>> Modules;
-  // Maps an id to its corresponding instruction
-  std::map<std::size_t, llvm::Instruction *> IDInstructionMapping;
-
-  void buildIDModuleMapping(llvm::Module *M);
-
-  void preprocessModule(llvm::Module *M);
-  static bool wasCompiledWithDebugInfo(llvm::Module *M) {
-    return M->getNamedMetadata("llvm.dbg.cu") != nullptr;
-  };
-
-  void preprocessAllModules();
-
 public:
-  /// Constructs an empty ProjectIRDB
-  ProjectIRDB(IRDBOptions Options);
-  /// Constructs a ProjectIRDB from a bunch of LLVM IR files
-  ProjectIRDB(const std::vector<std::string> &IRFiles,
-              IRDBOptions Options = (IRDBOptions::WPA | IRDBOptions::OWNS));
-  /// Constructs a ProjecIRDB from a bunch of LLVM Modules
-  ProjectIRDB(const std::vector<llvm::Module *> &Modules,
-              IRDBOptions Options = IRDBOptions::WPA);
+  virtual ~ProjectIRDB() = default;
 
-  ProjectIRDB(ProjectIRDB &&) = default;
-  ProjectIRDB &operator=(ProjectIRDB &&) = default;
+  /// Returns the fully linked WPA module that represents the entire program.
+  virtual M getWPAModule() const = 0;
 
-  ProjectIRDB(ProjectIRDB &) = delete;
-  ProjectIRDB &operator=(const ProjectIRDB &) = delete;
+  /// Returns the specified module.
+  virtual M getModule(const std::string &ModuleName) const = 0;
 
-  ~ProjectIRDB();
+  /// Returns the module that provides the specified function definition or
+  /// null.
+  virtual M
+  getModuleDefiningFunction(const std::string &FunctionName) const = 0;
 
-  void insertModule(llvm::Module *M);
+  /// Returns all managed modules.
+  virtual std::set<M> getAllModules() const = 0;
 
-  // add WPA support by providing a fat completely linked module
-  void linkForWPA();
-  // get a completely linked module for the WPA_MODE
-  llvm::Module *getWPAModule();
+  /// Returns the number of managed modules.
+  virtual std::size_t getNumberOfModules() const = 0;
 
-  [[nodiscard]] inline bool containsSourceFile(const std::string &File) const {
-    return Modules.find(File) != Modules.end();
-  };
+  /// Returns the function's definition if available, its declaration otherwise.
+  virtual F getFunction(const std::string &FunctionName) const = 0;
 
-  [[nodiscard]] inline bool empty() const { return Modules.empty(); };
+  /// Returns the function's definition if available, null otherwise.
+  virtual F getFunctionDefinition(const std::string &FunctionName) const = 0;
 
-  [[nodiscard]] bool debugInfoAvailable() const;
+  /// Returns a set of all function definitions and declarations available.
+  virtual std::set<F> getAllFunctions() const = 0;
 
-  llvm::Module *getModule(const std::string &ModuleName);
+  /// Returns the global variable's definition if available, its declaration
+  /// otherwise.
+  virtual G getGlobalVariable(const std::string &GlobalVariableName) const = 0;
 
-  [[nodiscard]] inline std::set<llvm::Module *> getAllModules() const {
-    std::set<llvm::Module *> ModuleSet;
-    for (const auto &[File, Module] : Modules) {
-      ModuleSet.insert(Module.get());
-    }
-    return ModuleSet;
-  }
+  /// Returns the global variable's definition if available, null otherwise.
+  virtual G
+  getGlobalVariableDefinition(const std::string &GlobalVariableName) const = 0;
 
-  [[nodiscard]] std::set<const llvm::Function *> getAllFunctions() const;
+  /// Returns the instruction to the corresponding ID.
+  virtual N getInstruction(std::size_t Id) const = 0;
 
-  [[nodiscard]] const llvm::Function *
-  getFunctionDefinition(const std::string &FunctionName) const;
+  /// Returns an instruction's ID.
+  virtual std::size_t getInstructionID(N I) const = 0;
 
-  [[nodiscard]] const llvm::Function *
-  getFunction(const std::string &FunctionName) const;
+  /// Returns all stack and heap allocating instructions.
+  virtual std::set<N> getAllocaInstructions() const = 0;
 
-  [[nodiscard]] const llvm::GlobalVariable *
-  getGlobalVariableDefinition(const std::string &GlobalVariableName) const;
+  /// Returns all memory locations including global variables.
+  virtual std::set<V> getAllMemoryLocations() const = 0;
 
-  llvm::Module *getModuleDefiningFunction(const std::string &FunctionName);
+  /// Returns all return and resume instructions.
+  virtual std::set<N> getRetOrResInstructions() const = 0;
 
-  [[nodiscard]] const llvm::Module *
-  getModuleDefiningFunction(const std::string &FunctionName) const;
+  /// Returns the struct type's definition if available, its declaration
+  /// otherwise.
+  virtual T getStructType(const std::string &TypeName) const = 0;
 
-  [[nodiscard]] std::set<const llvm::Instruction *>
-  getAllocaInstructions() const {
-    return AllocaInstructions;
-  };
+  /// Returns the struct type's definition if available, null otherwise.
+  virtual T getStructTypeDefinition(const std::string &TypeName) const = 0;
 
-  /**
-   * LLVM's intrinsic global variables are excluded.
-   *
-   * @brief Returns all stack and heap allocations, including global variables.
-   */
-  [[nodiscard]] std::set<const llvm::Value *> getAllMemoryLocations() const;
+  /// Returns all allocated types.
+  virtual std::set<T> getAllocatedTypes() const = 0;
 
-  [[nodiscard]] std::set<std::string> getAllSourceFiles() const;
+  /// Returns all allocated struct types.
+  virtual std::set<T> getAllocatedStructTypes() const = 0;
 
-  [[nodiscard]] std::set<const llvm::Type *> getAllocatedTypes() const {
-    return AllocatedTypes;
-  };
+  /// Returns all source files managed by this ProjectIRDB.
+  virtual std::set<std::string> getAllSourceFiles() const = 0;
 
-  [[nodiscard]] std::set<const llvm::StructType *>
-  getAllocatedStructTypes() const;
+  /// Checks if the ProjectIRDB contains the specified source file.
+  virtual bool containsSourceFile(const std::string &File) const = 0;
 
-  [[nodiscard]] std::set<const llvm::Instruction *>
-  getRetOrResInstructions() const {
-    return RetOrResInstructions;
-  };
+  /// Check if ProjectIRDB is empty.
+  virtual bool empty() const = 0;
 
-  [[nodiscard]] std::size_t getNumberOfModules() const {
-    return Modules.size();
-  };
+  /// Check if debug information are available.
+  virtual bool hasDebugInfo() const = 0;
 
-  [[nodiscard]] llvm::Instruction *getInstruction(std::size_t id);
+  /// Prints the contents of this ProjectIRDB to the specified output stream.
+  virtual void print(std::ostream &OS = std::cout) const = 0;
 
-  [[nodiscard]] static std::size_t getInstructionID(const llvm::Instruction *I);
+  /// Prints the potentially preprocessed contents of this ProjectIRDB to the
+  /// specified output stream.
+  virtual void emitPreprocessedIR(std::ostream &OS = std::cout,
+                                  bool ShortenIR = true) const = 0;
 
-  void print() const;
+  /// Builds a strings representation of the given value that can be persisted.
+  virtual std::string valueToPersistedString(V Val) const = 0;
 
-  void emitPreprocessedIR(std::ostream &os = std::cout,
-                          bool ShortenIR = true) const;
-
-  /**
-   * Allows the (de-)serialization of Instructions, Arguments, GlobalValues and
-   * Operands into unique Hexastore string representation.
-   *
-   * What values can be serialized and what scheme is used?
-   *
-   * 	1. Instructions
-   *
-   * 		<function name>.<id>
-   *
-   * 	2. Formal parameters
-   *
-   *		<function name>.f<arg-no>
-   *
-   *	3. Global variables
-   *
-   *		<global variable name>
-   *
-   *	4. ZeroValue
-   *
-   *		<ZeroValueInternalName>
-   *
-   *	5. Operand of an instruction
-   *
-   *		<function name>.<id>.o.<operand no>
-   *
-   * @brief Creates a unique string representation for any given
-   * llvm::Value.
-   */
-  [[nodiscard]] static std::string valueToPersistedString(const llvm::Value *V);
-  /**
-   * @brief Convertes the given string back into the llvm::Value it represents.
-   * @return Pointer to the converted llvm::Value.
-   */
-  [[nodiscard]] const llvm::Value *
-  persistedStringToValue(const std::string &StringRep) const;
+  /// Retrieves the original value that has been persisted by the given string
+  /// representation.
+  virtual V persistedStringToValue(const std::string &StringRep) const = 0;
 };
 
 } // namespace psr

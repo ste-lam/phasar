@@ -451,7 +451,7 @@ void IFDSUninitializedVariables::emitTextReport(
   if (UndefValueUses.empty()) {
     OS << "No uses of uninitialized variables found by the analysis!\n";
   } else {
-    if (!IRDB->debugInfoAvailable()) {
+    if (!IRDB->hasDebugInfo()) {
       // Emit only IR code, function name and module info
       OS << "\nWARNING: No Debug Info available - emiting results without "
             "source code mapping!\n";
