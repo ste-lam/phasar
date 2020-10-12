@@ -86,26 +86,26 @@ public:
   LLVMProjectIRDB(LLVMProjectIRDB &) = delete;
   LLVMProjectIRDB &operator=(const LLVMProjectIRDB &) = delete;
 
-  ~LLVMProjectIRDB();
+  ~LLVMProjectIRDB() override = default;
 
   void insertModule(llvm::Module *M);
 
   // add WPA support by providing a fat completely linked module
   void linkForWPA();
   // get a completely linked module for the WPA_MODE
-  llvm::Module *getWPAModule();
+  llvm::Module *getWPAModule() const override;
 
-  [[nodiscard]] inline bool containsSourceFile(const std::string &File) const {
+  [[nodiscard]] inline bool containsSourceFile(const std::string &File) const override {
     return Modules.find(File) != Modules.end();
   };
 
-  [[nodiscard]] inline bool empty() const { return Modules.empty(); };
+  [[nodiscard]] inline bool empty() const override { return Modules.empty(); };
 
-  [[nodiscard]] bool hasDebugInfo() const;
+  [[nodiscard]] bool hasDebugInfo() const override;
 
-  llvm::Module *getModule(const std::string &ModuleName);
+  llvm::Module *getModule(const std::string &ModuleName) const override;
 
-  [[nodiscard]] inline std::set<llvm::Module *> getAllModules() const {
+  [[nodiscard]] inline std::set<llvm::Module *> getAllModules() const override {
     std::set<llvm::Module *> ModuleSet;
     for (const auto &[File, Module] : Modules) {
       ModuleSet.insert(Module.get());
@@ -113,24 +113,24 @@ public:
     return ModuleSet;
   }
 
-  [[nodiscard]] std::set<const llvm::Function *> getAllFunctions() const;
+  [[nodiscard]] std::set<const llvm::Function *> getAllFunctions() const override;
 
   [[nodiscard]] const llvm::Function *
-  getFunctionDefinition(const std::string &FunctionName) const;
+  getFunctionDefinition(const std::string &FunctionName) const override;
 
   [[nodiscard]] const llvm::Function *
-  getFunction(const std::string &FunctionName) const;
+  getFunction(const std::string &FunctionName) const override;
 
   [[nodiscard]] const llvm::GlobalVariable *
-  getGlobalVariableDefinition(const std::string &GlobalVariableName) const;
+  getGlobalVariableDefinition(const std::string &GlobalVariableName) const override;
 
-  llvm::Module *getModuleDefiningFunction(const std::string &FunctionName);
+  llvm::Module *getModuleDefiningFunction(const std::string &FunctionName) const override;
 
   [[nodiscard]] const llvm::Module *
   getModuleDefiningFunction(const std::string &FunctionName) const;
 
   [[nodiscard]] std::set<const llvm::Instruction *>
-  getAllocaInstructions() const {
+  getAllocaInstructions() const override {
     return AllocaInstructions;
   };
 
@@ -139,34 +139,34 @@ public:
    *
    * @brief Returns all stack and heap allocations, including global variables.
    */
-  [[nodiscard]] std::set<const llvm::Value *> getAllMemoryLocations() const;
+  [[nodiscard]] std::set<const llvm::Value *> getAllMemoryLocations() const override;
 
-  [[nodiscard]] std::set<std::string> getAllSourceFiles() const;
+  [[nodiscard]] std::set<std::string> getAllSourceFiles() const override;
 
-  [[nodiscard]] std::set<const llvm::Type *> getAllocatedTypes() const {
+  [[nodiscard]] std::set<const llvm::Type *> getAllocatedTypes() const override {
     return AllocatedTypes;
   };
 
   [[nodiscard]] std::set<const llvm::StructType *>
-  getAllocatedStructTypes() const;
+  getAllocatedStructTypes() const override;
 
   [[nodiscard]] std::set<const llvm::Instruction *>
-  getRetOrResInstructions() const {
+  getRetOrResInstructions() const override {
     return RetOrResInstructions;
   };
 
-  [[nodiscard]] std::size_t getNumberOfModules() const {
+  [[nodiscard]] std::size_t getNumberOfModules() const override {
     return Modules.size();
   };
 
-  [[nodiscard]] llvm::Instruction *getInstruction(std::size_t id);
+  [[nodiscard]] llvm::Instruction *getInstruction(std::size_t id) const override;
 
-  [[nodiscard]] static std::size_t getInstructionID(const llvm::Instruction *I);
+  [[nodiscard]] static std::size_t getInstructionID(const llvm::Instruction *I) const override;
 
-  void print() const;
+  void print() const override;
 
   void emitPreprocessedIR(std::ostream &os = std::cout,
-                          bool ShortenIR = true) const;
+                          bool ShortenIR = true) const override;
 
   /**
    * Allows the (de-)serialization of Instructions, Arguments, GlobalValues and
@@ -197,13 +197,13 @@ public:
    * @brief Creates a unique string representation for any given
    * llvm::Value.
    */
-  [[nodiscard]] static std::string valueToPersistedString(const llvm::Value *V);
+  [[nodiscard]] static std::string valueToPersistedString(const llvm::Value *V) const override;
   /**
    * @brief Convertes the given string back into the llvm::Value it represents.
    * @return Pointer to the converted llvm::Value.
    */
   [[nodiscard]] const llvm::Value *
-  persistedStringToValue(const std::string &StringRep) const;
+  persistedStringToValue(const std::string &StringRep) const override;
 };
 
 } // namespace psr
