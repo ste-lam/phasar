@@ -13,7 +13,7 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instruction.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 
 #include "ICFGTestPlugin.h"
 
@@ -29,12 +29,12 @@ __attribute__((constructor)) void init() {
 
 __attribute__((destructor)) void fini() { cout << "fini - ICFGTestPlugin\n"; }
 
-unique_ptr<ICFGPlugin> makeICFGTestPlugin(ProjectIRDB &IRDB,
+unique_ptr<ICFGPlugin> makeICFGTestPlugin(LLVMProjectIRDB &IRDB,
                                           const vector<string> &EntryPoints) {
   return unique_ptr<ICFGPlugin>(new ICFGTestPlugin(IRDB, EntryPoints));
 }
 
-ICFGTestPlugin::ICFGTestPlugin(ProjectIRDB &IRDB,
+ICFGTestPlugin::ICFGTestPlugin(LLVMProjectIRDB &IRDB,
                                const vector<string> &EntryPoints)
     : ICFGPlugin(IRDB, EntryPoints) {}
 

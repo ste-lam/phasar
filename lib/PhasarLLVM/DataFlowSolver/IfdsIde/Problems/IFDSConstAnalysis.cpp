@@ -33,7 +33,7 @@ using namespace std;
 using namespace psr;
 namespace psr {
 
-IFDSConstAnalysis::IFDSConstAnalysis(const ProjectIRDB *IRDB,
+IFDSConstAnalysis::IFDSConstAnalysis(const LLVMProjectIRDB *IRDB,
                                      const LLVMTypeHierarchy *TH,
                                      const LLVMBasedICFG *ICF,
                                      LLVMPointsToInfo *PT,

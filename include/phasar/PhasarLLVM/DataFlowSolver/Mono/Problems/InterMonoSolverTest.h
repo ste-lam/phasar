@@ -41,7 +41,7 @@ class LLVMTypeHierarchy;
 
 class InterMonoSolverTest : public InterMonoProblem<LLVMAnalysisDomainDefault> {
 public:
-  InterMonoSolverTest(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  InterMonoSolverTest(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                       const LLVMBasedICFG *ICF, const LLVMPointsToInfo *PT,
                       std::set<std::string> EntryPoints = {});
   ~InterMonoSolverTest() override = default;

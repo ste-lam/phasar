@@ -24,7 +24,7 @@
 #include "llvm/IR/Value.h"
 #include "llvm/IR/Verifier.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMBasedPointsToAnalysis.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToUtils.h"
 
@@ -105,7 +105,7 @@ void LLVMBasedPointsToAnalysis::clear() {
   FAM.clear();
 }
 
-LLVMBasedPointsToAnalysis::LLVMBasedPointsToAnalysis(ProjectIRDB &IRDB,
+LLVMBasedPointsToAnalysis::LLVMBasedPointsToAnalysis(LLVMProjectIRDB &IRDB,
                                                      bool UseLazyEvaluation,
                                                      PointerAnalysisType PATy)
     : PATy(PATy) {

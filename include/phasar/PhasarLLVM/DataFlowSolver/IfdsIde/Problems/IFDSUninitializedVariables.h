@@ -51,7 +51,7 @@ private:
   std::map<n_t, std::set<d_t>> UndefValueUses;
 
 public:
-  IFDSUninitializedVariables(const ProjectIRDB *IRDB,
+  IFDSUninitializedVariables(const LLVMProjectIRDB *IRDB,
                              const LLVMTypeHierarchy *TH,
                              const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                              std::set<std::string> EntryPoints = {"main"});

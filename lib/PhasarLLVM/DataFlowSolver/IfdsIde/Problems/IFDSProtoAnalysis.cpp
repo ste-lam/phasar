@@ -28,7 +28,7 @@ using namespace std;
 
 namespace psr {
 
-IFDSProtoAnalysis::IFDSProtoAnalysis(const ProjectIRDB *IRDB,
+IFDSProtoAnalysis::IFDSProtoAnalysis(const LLVMProjectIRDB *IRDB,
                                      const LLVMTypeHierarchy *TH,
                                      const LLVMBasedICFG *ICF,
                                      LLVMPointsToInfo *PT,

@@ -2,7 +2,7 @@
 
 #include "gtest/gtest.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/Mono/CallString.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/Mono/Problems/InterMonoTaintAnalysis.h"
@@ -24,7 +24,7 @@ protected:
       unittest::PathToLLTestFiles + "taint_analysis/";
   const std::set<std::string> EntryPoints = {"main"};
 
-  ProjectIRDB *IRDB = nullptr;
+  LLVMProjectIRDB *IRDB = nullptr;
 
   void SetUp() override {
     std::cout << "setup\n";
@@ -34,7 +34,8 @@ protected:
 
   std::map<llvm::Instruction const *, std::set<llvm::Value const *>>
   doAnalysis(const std::string &LlvmFilePath, bool PrintDump = false) {
-    IRDB = new ProjectIRDB({PathToLlFiles + LlvmFilePath}, IRDBOptions::WPA);
+    IRDB =
+        new LLVMProjectIRDB({PathToLlFiles + LlvmFilePath}, IRDBOptions::WPA);
     ValueAnnotationPass::resetValueID();
     LLVMTypeHierarchy TH(*IRDB);
     auto *PT = new LLVMPointsToSet(*IRDB);
@@ -59,7 +60,8 @@ protected:
   void doAnalysisAndCompare(const std::string &LlvmFilePath, size_t InstId,
                             const std::set<std::string> &GroundTruth,
                             bool PrintDump = false) {
-    IRDB = new ProjectIRDB({PathToLlFiles + LlvmFilePath}, IRDBOptions::WPA);
+    IRDB =
+        new LLVMProjectIRDB({PathToLlFiles + LlvmFilePath}, IRDBOptions::WPA);
     ValueAnnotationPass::resetValueID();
     LLVMTypeHierarchy TH(*IRDB);
     auto *PT = new LLVMPointsToSet(*IRDB);

@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "phasar/Config/Configuration.h"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToSet.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToUtils.h"
@@ -12,7 +12,7 @@
 using namespace psr;
 
 TEST(LLVMPointsToSet, Intra_01) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "pointers/basic_01_cpp_dbg.ll"});
 
   LLVMPointsToSet PTS(IRDB, false);
@@ -27,7 +27,7 @@ TEST(LLVMPointsToSet, Intra_01) {
 }
 
 TEST(LLVMPointsToSet, Inter_01) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "pointers/call_01_cpp_dbg.ll"});
   LLVMPointsToSet PTS(IRDB, false);
   LLVMTypeHierarchy TH(IRDB);
@@ -43,7 +43,7 @@ TEST(LLVMPointsToSet, Inter_01) {
 }
 
 TEST(LLVMPointsToSet, Global_01) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "pointers/global_01_cpp_dbg.ll"});
   LLVMPointsToSet PTS(IRDB, false);
   LLVMTypeHierarchy TH(IRDB);

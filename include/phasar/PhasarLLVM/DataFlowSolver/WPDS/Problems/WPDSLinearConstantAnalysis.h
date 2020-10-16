@@ -29,7 +29,7 @@ namespace psr {
 class LLVMBasedICFG;
 class LLVMPointsToInfo;
 class LLVMTypeHierarchy;
-class ProjectIRDB;
+class LLVMProjectIRDB;
 
 struct WPDSLinearConstantAnalysisDomain : public LLVMAnalysisDomainDefault {
   using l_t = int64_t;
@@ -39,7 +39,7 @@ class WPDSLinearConstantAnalysis
     : public virtual WPDSProblem<WPDSLinearConstantAnalysisDomain>,
       public virtual IDELinearConstantAnalysis {
 public:
-  WPDSLinearConstantAnalysis(const ProjectIRDB *IRDB,
+  WPDSLinearConstantAnalysis(const LLVMProjectIRDB *IRDB,
                              const LLVMTypeHierarchy *TH,
                              const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                              const std::set<std::string> &EntryPoints = {

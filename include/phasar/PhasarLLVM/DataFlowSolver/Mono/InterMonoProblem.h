@@ -24,7 +24,7 @@
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 template <typename T, typename F> class TypeHierarchy;
 template <typename V, typename N> class PointsToInfo;
 template <typename N, typename F> class ICFG;
@@ -46,8 +46,9 @@ protected:
   const i_t *ICF;
 
 public:
-  InterMonoProblem(const ProjectIRDB *IRDB, const TypeHierarchy<t_t, f_t> *TH,
-                   const i_t *ICF, const PointsToInfo<v_t, n_t> *PT,
+  InterMonoProblem(const LLVMProjectIRDB *IRDB,
+                   const TypeHierarchy<t_t, f_t> *TH, const i_t *ICF,
+                   const PointsToInfo<v_t, n_t> *PT,
                    std::set<std::string> EntryPoints = {})
       : IntraMonoProblem<AnalysisDomainTy>(IRDB, TH, ICF, PT, EntryPoints),
         ICF(ICF) {}

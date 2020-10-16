@@ -12,7 +12,7 @@
 
 #include "boost/filesystem/operations.hpp"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDELinearConstantAnalysis.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IFDSLinearConstantAnalysis.h"
@@ -37,7 +37,7 @@ int main(int Argc, const char **Argv) {
                  "Usage: myphasartool <LLVM IR file>\n";
     return 1;
   }
-  ProjectIRDB DB({Argv[1]});
+  LLVMProjectIRDB DB({Argv[1]});
   if (const auto *F = DB.getFunctionDefinition("main")) {
     LLVMTypeHierarchy H(DB);
     // print type hierarchy

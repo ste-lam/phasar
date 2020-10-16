@@ -34,8 +34,9 @@ class IFDSSimpleTaintAnalysis : public IFDSTabulationProblemPlugin {
   FlowFactManager<ValueFlowFactWrapper> ffManager;
 
 public:
-  IFDSSimpleTaintAnalysis(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
-                          const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
+  IFDSSimpleTaintAnalysis(const LLVMProjectIRDB *IRDB,
+                          const LLVMTypeHierarchy *TH, const LLVMBasedICFG *ICF,
+                          LLVMPointsToInfo *PT,
                           std::set<std::string> EntryPoints = {});
   ~IFDSSimpleTaintAnalysis() = default;
 

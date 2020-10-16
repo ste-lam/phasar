@@ -9,7 +9,7 @@
 
 #include <utility>
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/EdgeFunctions.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/FlowFunctions.h"
@@ -25,7 +25,7 @@ using namespace psr;
 
 namespace psr {
 
-WPDSAliasCollector::WPDSAliasCollector(const ProjectIRDB *IRDB,
+WPDSAliasCollector::WPDSAliasCollector(const LLVMProjectIRDB *IRDB,
                                        const LLVMTypeHierarchy *TH,
                                        const LLVMBasedICFG *ICF,
                                        LLVMPointsToInfo *PT,

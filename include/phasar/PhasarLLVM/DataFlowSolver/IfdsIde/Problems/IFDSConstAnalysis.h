@@ -52,7 +52,7 @@ private:
   std::set<d_t> Initialized;
 
 public:
-  IFDSConstAnalysis(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  IFDSConstAnalysis(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                     std::set<std::string> EntryPoints = {"main"});
 

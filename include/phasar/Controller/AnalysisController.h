@@ -17,7 +17,7 @@
 
 #include "boost/filesystem.hpp"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/AnalysisStrategy/Strategies.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMBasedPointsToAnalysis.h"
@@ -49,7 +49,7 @@ enum class AnalysisControllerEmitterOptions : uint32_t {
 
 class AnalysisController {
 private:
-  ProjectIRDB &IRDB;
+  LLVMProjectIRDB &IRDB;
   LLVMTypeHierarchy TH;
   LLVMPointsToSet PT;
   LLVMBasedICFG ICF;
@@ -113,7 +113,7 @@ private:
   }
 
 public:
-  AnalysisController(ProjectIRDB &IRDB,
+  AnalysisController(LLVMProjectIRDB &IRDB,
                      std::vector<DataFlowAnalysisKind> DataFlowAnalyses,
                      std::vector<std::string> AnalysisConfigs,
                      PointerAnalysisType PTATy, CallGraphAnalysisType CGTy,

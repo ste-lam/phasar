@@ -30,7 +30,7 @@ class StructType;
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 class LLVMTypeHierarchy;
 class LLVMPointsToInfo;
 
@@ -47,7 +47,7 @@ public:
   using plain_d_t =
       typename InterMonoFullConstantPropagationAnalysisDomain::plain_d_t;
 
-  InterMonoFullConstantPropagation(const ProjectIRDB *IRDB,
+  InterMonoFullConstantPropagation(const LLVMProjectIRDB *IRDB,
                                    const LLVMTypeHierarchy *TH,
                                    const LLVMBasedICFG *ICF,
                                    const LLVMPointsToInfo *PT,

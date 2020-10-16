@@ -49,7 +49,7 @@ struct IntraMonoFullConstantPropagationAnalysisDomain
 class IntraMonoFullConstantPropagation
     : public IntraMonoProblem<IntraMonoFullConstantPropagationAnalysisDomain> {
 public:
-  IntraMonoFullConstantPropagation(const ProjectIRDB *IRDB,
+  IntraMonoFullConstantPropagation(const LLVMProjectIRDB *IRDB,
                                    const LLVMTypeHierarchy *TH,
                                    const LLVMBasedCFG *CF,
                                    const LLVMPointsToInfo *PT,

@@ -34,7 +34,7 @@ public:
   typedef const llvm::Instruction *n_t;
   typedef const llvm::Function *f_t;
 
-  ICFGTestPlugin(ProjectIRDB &IRDB,
+  ICFGTestPlugin(LLVMProjectIRDB &IRDB,
                  const std::vector<std::string> &EntryPoints);
 
   ~ICFGTestPlugin() override = default;
@@ -113,7 +113,7 @@ public:
 };
 
 extern "C" std::unique_ptr<ICFGPlugin>
-makeICFGTestPlugin(ProjectIRDB &IRDB,
+makeICFGTestPlugin(LLVMProjectIRDB &IRDB,
                    const std::vector<std::string> &EntryPoints);
 } // namespace psr
 

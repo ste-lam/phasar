@@ -31,7 +31,7 @@ namespace psr {
 
 struct HasNoConfigurationType;
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 template <typename T, typename F> class TypeHierarchy;
 template <typename V, typename N> class PointsToInfo;
 template <typename N, typename F> class CFG;
@@ -55,7 +55,7 @@ public:
   using ProblemAnalysisDomain = AnalysisDomainTy;
 
 protected:
-  const ProjectIRDB *IRDB;
+  const LLVMProjectIRDB *IRDB;
   const TypeHierarchy<t_t, f_t> *TH;
   const c_t *CF;
   const PointsToInfo<v_t, n_t> *PT;
@@ -67,8 +67,9 @@ public:
   // a user problem can override the type of configuration to be used, if any
   using ConfigurationTy = HasNoConfigurationType;
 
-  IntraMonoProblem(const ProjectIRDB *IRDB, const TypeHierarchy<t_t, f_t> *TH,
-                   const c_t *CF, const PointsToInfo<v_t, n_t> *PT,
+  IntraMonoProblem(const LLVMProjectIRDB *IRDB,
+                   const TypeHierarchy<t_t, f_t> *TH, const c_t *CF,
+                   const PointsToInfo<v_t, n_t> *PT,
                    std::set<std::string> EntryPoints = {})
       : IRDB(IRDB), TH(TH), CF(CF), PT(PT), EntryPoints(EntryPoints) {}
   ~IntraMonoProblem() override = default;
@@ -85,7 +86,7 @@ public:
 
   std::set<std::string> getEntryPoints() const { return EntryPoints; }
 
-  const ProjectIRDB *getProjectIRDB() const { return IRDB; }
+  const LLVMProjectIRDB *getProjectIRDB() const { return IRDB; }
 
   const TypeHierarchy<t_t, f_t> *getTypeHierarchy() const { return TH; }
 

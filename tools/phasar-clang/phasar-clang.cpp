@@ -11,7 +11,7 @@
 
 // #include "phasar/Controller/AnalysisExecutor.h"
 #include "boost/filesystem/operations.hpp"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/Utils/Logger.h"
 
 namespace bfs = boost::filesystem;
@@ -25,7 +25,7 @@ int main(int Argc, const char **Argv) {
     return 1;
   }
   initializeLogger(false);
-  ProjectIRDB DB({Argv[1]}, IRDBOptions::WPA);
+  LLVMProjectIRDB DB({Argv[1]}, IRDBOptions::WPA);
   if (DB.getFunction("main")) {
   } else {
     std::cerr << "error: file does not contain a 'main' function!\n";

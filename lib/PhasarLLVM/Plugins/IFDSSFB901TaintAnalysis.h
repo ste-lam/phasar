@@ -30,8 +30,9 @@ struct ValueFlowFactWrapper : public FlowFactWrapper<const llvm::Value *> {
 };
 class IFDSSFB901TaintAnalysis : public IFDSTabulationProblemPlugin {
 public:
-  IFDSSFB901TaintAnalysis(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
-                          const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
+  IFDSSFB901TaintAnalysis(const LLVMProjectIRDB *IRDB,
+                          const LLVMTypeHierarchy *TH, const LLVMBasedICFG *ICF,
+                          LLVMPointsToInfo *PT,
                           std::set<std::string> EntryPoints);
   ~IFDSSFB901TaintAnalysis() = default;
 

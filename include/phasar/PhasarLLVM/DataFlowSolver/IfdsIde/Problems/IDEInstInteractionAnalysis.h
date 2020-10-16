@@ -103,7 +103,7 @@ public:
 
   using EdgeFactGeneratorTy = std::set<e_t>(n_t curr);
 
-  IDEInstInteractionAnalysisT(const ProjectIRDB *IRDB,
+  IDEInstInteractionAnalysisT(const LLVMProjectIRDB *IRDB,
                               const LLVMTypeHierarchy *TH,
                               const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                               std::set<std::string> EntryPoints = {"main"})

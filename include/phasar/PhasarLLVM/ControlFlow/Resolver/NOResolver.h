@@ -30,7 +30,7 @@ protected:
                                                   llvm::ImmutableCallSite CS);
 
 public:
-  NOResolver(ProjectIRDB &IRDB);
+  NOResolver(LLVMProjectIRDB &IRDB);
 
   ~NOResolver() override = default;
 

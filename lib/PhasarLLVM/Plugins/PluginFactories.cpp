@@ -23,7 +23,7 @@ map<string, IntraMonoPluginConstructor> IntraMonoProblemPluginFactory;
 
 map<string, InterMonoPluginConstructor> InterMonoProblemPluginFactory;
 
-map<string, unique_ptr<ICFGPlugin> (*)(ProjectIRDB &,
+map<string, unique_ptr<ICFGPlugin> (*)(LLVMProjectIRDB &,
                                        const vector<string> &EntryPoints)>
     ICFGPluginFactory;
 

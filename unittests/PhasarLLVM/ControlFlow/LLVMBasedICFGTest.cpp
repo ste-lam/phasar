@@ -6,7 +6,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "phasar/Config/Configuration.h"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedCFG.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToInfo.h"
@@ -19,7 +19,7 @@ using namespace std;
 using namespace psr;
 
 TEST(LLVMBasedICFGTest, StaticCallSite_1) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_1_c.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -40,7 +40,7 @@ TEST(LLVMBasedICFGTest, StaticCallSite_1) {
 }
 
 TEST(LLVMBasedICFGTest, StaticCallSite_2) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_2_c.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -65,7 +65,7 @@ TEST(LLVMBasedICFGTest, StaticCallSite_2) {
 }
 
 TEST(LLVMBasedICFGTest, VirtualCallSite_1) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/virtual_call_1_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -85,7 +85,7 @@ TEST(LLVMBasedICFGTest, VirtualCallSite_1) {
 }
 
 TEST(LLVMBasedICFGTest, FunctionPointer_1) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/function_pointer_1_c.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -104,7 +104,7 @@ TEST(LLVMBasedICFGTest, FunctionPointer_1) {
 }
 
 TEST(LLVMBasedICFGTest, StaticCallSite_3) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_3_c.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -124,7 +124,7 @@ TEST(LLVMBasedICFGTest, StaticCallSite_3) {
 }
 
 TEST(LLVMBasedICFGTest, StaticCallSite_4) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_4_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -159,7 +159,7 @@ TEST(LLVMBasedICFGTest, StaticCallSite_4) {
 }
 
 TEST(LLVMBasedICFGTest, StaticCallSite_5) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_5_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -182,7 +182,7 @@ TEST(LLVMBasedICFGTest, StaticCallSite_5) {
 }
 
 TEST(LLVMBasedICFGTest, StaticCallSite_6) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_6_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -207,7 +207,7 @@ TEST(LLVMBasedICFGTest, StaticCallSite_6) {
 }
 
 TEST(LLVMBasedICFGTest, StaticCallSite_7) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_7_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -231,7 +231,7 @@ TEST(LLVMBasedICFGTest, StaticCallSite_7) {
 }
 
 TEST(LLVMBasedICFGTest, StaticCallSite_8) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/static_callsite_8_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);

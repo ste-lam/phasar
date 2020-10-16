@@ -21,7 +21,7 @@
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Module.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/Resolver/RTAResolver.h"
 #include "phasar/PhasarLLVM/TypeHierarchy/LLVMTypeHierarchy.h"
 #include "phasar/Utils/LLVMShorthands.h"
@@ -31,7 +31,7 @@
 using namespace std;
 using namespace psr;
 
-RTAResolver::RTAResolver(ProjectIRDB &IRDB, LLVMTypeHierarchy &TH)
+RTAResolver::RTAResolver(LLVMProjectIRDB &IRDB, LLVMTypeHierarchy &TH)
     : CHAResolver(IRDB, TH) {}
 
 // void RTAResolver::firstFunction(const llvm::Function *F) {

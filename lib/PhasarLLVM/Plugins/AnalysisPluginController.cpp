@@ -14,7 +14,7 @@
 
 #include "llvm/Support/ErrorHandling.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Solver/IDESolver.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Solver/IFDSSolver.h"
@@ -32,9 +32,10 @@ using namespace psr;
 namespace psr {
 
 AnalysisPluginController::AnalysisPluginController(
-    const std::vector<std::string> &AnalysisPlygins, const ProjectIRDB *IRDB,
-    const LLVMTypeHierarchy *TH, const LLVMBasedICFG *ICF,
-    const LLVMPointsToInfo *PT, const std::set<std::string> &EntryPoints) {
+    const std::vector<std::string> &AnalysisPlygins,
+    const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+    const LLVMBasedICFG *ICF, const LLVMPointsToInfo *PT,
+    const std::set<std::string> &EntryPoints) {
   for (const auto &AnalysisPlugin : AnalysisPlygins) {
     boost::filesystem::path LibPath(AnalysisPlugin);
     boost::system::error_code Err;

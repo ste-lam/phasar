@@ -23,7 +23,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/ErrorHandling.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/ControlFlow/Resolver/OTFResolver.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToGraph.h"
@@ -36,7 +36,7 @@
 using namespace std;
 using namespace psr;
 
-OTFResolver::OTFResolver(ProjectIRDB &IRDB, LLVMTypeHierarchy &TH,
+OTFResolver::OTFResolver(LLVMProjectIRDB &IRDB, LLVMTypeHierarchy &TH,
                          LLVMBasedICFG &ICF, LLVMPointsToInfo &PT)
     : CHAResolver(IRDB, TH), ICF(ICF), PT(PT) {}
 

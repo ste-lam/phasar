@@ -30,7 +30,7 @@ class Function;
 namespace psr {
 class RTAResolver : public CHAResolver {
 public:
-  RTAResolver(ProjectIRDB &IRDB, LLVMTypeHierarchy &TH);
+  RTAResolver(LLVMProjectIRDB &IRDB, LLVMTypeHierarchy &TH);
 
   ~RTAResolver() override = default;
 

@@ -13,7 +13,7 @@ using namespace psr;
 namespace psr {
 
 unique_ptr<IDETabulationProblemPlugin> makeIDETabulationProblemTestPlugin(
-    const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+    const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
     std::set<std::string> EntryPoints) {
   return unique_ptr<IDETabulationProblemPlugin>(
@@ -32,7 +32,7 @@ __attribute__((destructor)) void fini() {
 }
 
 IDETabulationProblemTestPlugin::IDETabulationProblemTestPlugin(
-    const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+    const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
     std::set<std::string> EntryPoints)
     : IDETabulationProblemPlugin(IRDB, TH, ICF, PT, std::move(EntryPoints)) {

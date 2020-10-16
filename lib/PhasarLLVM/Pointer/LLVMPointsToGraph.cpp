@@ -21,7 +21,7 @@
 #include "boost/graph/graphviz.hpp"
 #include "boost/log/sources/record_ostream.hpp"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMBasedPointsToAnalysis.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToGraph.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToUtils.h"
@@ -138,7 +138,8 @@ std::string LLVMPointsToGraph::EdgeProperties::getValueAsString() const {
 
 // points-to graph stuff
 
-LLVMPointsToGraph::LLVMPointsToGraph(ProjectIRDB &IRDB, bool UseLazyEvaluation,
+LLVMPointsToGraph::LLVMPointsToGraph(LLVMProjectIRDB &IRDB,
+                                     bool UseLazyEvaluation,
                                      PointerAnalysisType PATy)
     : PTA(IRDB, UseLazyEvaluation, PATy) {}
 

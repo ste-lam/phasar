@@ -45,7 +45,7 @@ class BitCastInst;
 namespace psr {
 
 class Resolver;
-class ProjectIRDB;
+class LLVMProjectIRDB;
 class LLVMTypeHierarchy;
 
 class LLVMBasedICFG
@@ -54,7 +54,7 @@ class LLVMBasedICFG
   friend class LLVMBasedBackwardsICFG;
 
 private:
-  ProjectIRDB &IRDB;
+  LLVMProjectIRDB &IRDB;
   CallGraphAnalysisType CGType;
   SoundnessFlag SF;
   bool UserTHInfos = true;
@@ -109,7 +109,7 @@ private:
 
   void constructionWalker(const llvm::Function *F, Resolver &Resolver);
 
-  std::unique_ptr<Resolver> makeResolver(ProjectIRDB &IRDB,
+  std::unique_ptr<Resolver> makeResolver(LLVMProjectIRDB &IRDB,
                                          CallGraphAnalysisType CGT,
                                          LLVMTypeHierarchy &TH,
                                          LLVMPointsToInfo &PT);
@@ -125,7 +125,7 @@ public:
   using OutEdgesAndTargets = std::unordered_multimap<const llvm::Instruction *,
                                                      const llvm::Function *>;
 
-  LLVMBasedICFG(ProjectIRDB &IRDB, CallGraphAnalysisType CGType,
+  LLVMBasedICFG(LLVMProjectIRDB &IRDB, CallGraphAnalysisType CGType,
                 const std::set<std::string> &EntryPoints = {},
                 LLVMTypeHierarchy *TH = nullptr, LLVMPointsToInfo *PT = nullptr,
                 SoundnessFlag SF = SoundnessFlag::SOUNDY);

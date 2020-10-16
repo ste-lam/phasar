@@ -29,7 +29,7 @@
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 template <typename T, typename F> class TypeHierarchy;
 template <typename V, typename N> class PointsToInfo;
 
@@ -54,7 +54,7 @@ public:
 
   using typename EdgeFunctions<AnalysisDomainTy>::EdgeFunctionPtrType;
 
-  IDETabulationProblem(const ProjectIRDB *IRDB,
+  IDETabulationProblem(const LLVMProjectIRDB *IRDB,
                        const TypeHierarchy<t_t, f_t> *TH, const i_t *ICF,
                        PointsToInfo<v_t, n_t> *PT,
                        std::set<std::string> EntryPoints = {})

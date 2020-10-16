@@ -295,7 +295,7 @@ int main(int Argc, const char **Argv) {
     return 0;
   }
   // setup IRDB as source code manager
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       PhasarConfig::VariablesMap()["module"].as<std::vector<std::string>>());
 
   // store enabled data-flow analyses

@@ -22,8 +22,9 @@ namespace psr {
 class InterMonoProblemPlugin
     : public InterMonoProblem<LLVMAnalysisDomainDefault> {
 public:
-  InterMonoProblemPlugin(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
-                         const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
+  InterMonoProblemPlugin(const LLVMProjectIRDB *IRDB,
+                         const LLVMTypeHierarchy *TH, const LLVMBasedICFG *ICF,
+                         LLVMPointsToInfo *PT,
                          std::set<std::string> EntryPoints)
       : InterMonoProblem(IRDB, TH, ICF, PT, EntryPoints) {}
 
@@ -39,13 +40,14 @@ public:
 };
 
 extern std::unique_ptr<InterMonoProblemPlugin>
-makeInterMonoProblemPlugin(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+makeInterMonoProblemPlugin(const LLVMProjectIRDB *IRDB,
+                           const LLVMTypeHierarchy *TH,
                            const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                            std::set<std::string> EntryPoints);
 
 extern std::map<std::string,
                 std::unique_ptr<InterMonoProblemPlugin> (*)(
-                    const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+                    const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                     std::set<std::string> EntryPoints)>
     InterMonoProblemPluginFactory;

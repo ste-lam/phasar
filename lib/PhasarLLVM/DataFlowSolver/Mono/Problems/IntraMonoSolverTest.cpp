@@ -33,7 +33,7 @@ using namespace psr;
 
 namespace psr {
 
-IntraMonoSolverTest::IntraMonoSolverTest(const ProjectIRDB *IRDB,
+IntraMonoSolverTest::IntraMonoSolverTest(const LLVMProjectIRDB *IRDB,
                                          const LLVMTypeHierarchy *TH,
                                          const LLVMBasedCFG *CF,
                                          const LLVMPointsToInfo *PT,

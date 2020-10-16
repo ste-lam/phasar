@@ -53,7 +53,8 @@ public:
   using typename IDETabProblemType::t_t;
   using typename IDETabProblemType::v_t;
 
-  IDESecureHeapPropagation(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  IDESecureHeapPropagation(const LLVMProjectIRDB *IRDB,
+                           const LLVMTypeHierarchy *TH,
                            const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                            std::set<std::string> EntryPoints = {"main"});
   ~IDESecureHeapPropagation() override = default;

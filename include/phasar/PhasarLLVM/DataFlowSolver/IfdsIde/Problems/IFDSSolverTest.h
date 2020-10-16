@@ -34,7 +34,7 @@ class LLVMPointsToInfo;
 
 class IFDSSolverTest : public IFDSTabulationProblem<LLVMAnalysisDomainDefault> {
 public:
-  IFDSSolverTest(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  IFDSSolverTest(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                  const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                  std::set<std::string> EntryPoints = {"main"});
 

@@ -14,7 +14,7 @@
 
 #include "gtest/gtest.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDEInstInteractionAnalysis.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Solver/IDESolver.h"
@@ -40,7 +40,7 @@ protected:
   using IIACompactResult_t =
       std::tuple<std::string, std::size_t, std::string,
                  IDEInstInteractionAnalysisT<std::string, true>::l_t>;
-  ProjectIRDB *IRDB = nullptr;
+  LLVMProjectIRDB *IRDB = nullptr;
 
   void SetUp() override {
     boost::log::core::get()->set_logging_enabled(false);
@@ -52,7 +52,8 @@ protected:
   doAnalysisAndCompareResults(const std::string &LlvmFilePath,
                               const std::set<IIACompactResult_t> &GroundTruth,
                               bool PrintDump = false) {
-    IRDB = new ProjectIRDB({PathToLlFiles + LlvmFilePath}, IRDBOptions::WPA);
+    IRDB =
+        new LLVMProjectIRDB({PathToLlFiles + LlvmFilePath}, IRDBOptions::WPA);
     if (PrintDump) {
       IRDB->emitPreprocessedIR(std::cout, false);
     }

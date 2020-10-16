@@ -52,7 +52,7 @@ public:
   std::set<std::string> sink_functions = {"fwrite", "write", "printf"};
   static bool setContainsStr(std::set<std::string> s, const std::string &str);
 
-  IDETaintAnalysis(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  IDETaintAnalysis(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                    const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                    std::set<std::string> EntryPoints = {"main"});
 

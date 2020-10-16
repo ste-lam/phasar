@@ -27,7 +27,7 @@ using namespace psr;
 
 namespace psr {
 
-InterMonoSolverTest::InterMonoSolverTest(const ProjectIRDB *IRDB,
+InterMonoSolverTest::InterMonoSolverTest(const LLVMProjectIRDB *IRDB,
                                          const LLVMTypeHierarchy *TH,
                                          const LLVMBasedICFG *ICF,
                                          const LLVMPointsToInfo *PT,

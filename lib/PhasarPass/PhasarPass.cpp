@@ -13,7 +13,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/ICFG.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDEInstInteractionAnalysis.h"
@@ -55,7 +55,7 @@ llvm::StringRef PhasarPass::getPassName() const { return "PhasarPass"; }
 
 bool PhasarPass::runOnModule(llvm::Module &M) {
   // set up the IRDB
-  ProjectIRDB DB({&M}, IRDBOptions::WPA);
+  LLVMProjectIRDB DB({&M}, IRDBOptions::WPA);
   std::set<std::string> EntryPointsSet;
   // check if the requested entry points exist
   for (const std::string &EP : EntryPoints) {

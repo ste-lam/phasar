@@ -34,7 +34,7 @@ class BitCastInst;
 namespace psr {
 
 class Resolver;
-class ProjectIRDB;
+class LLVMProjectIRDB;
 class LLVMTypeHierarchy;
 class LLVMPointsToGraph;
 
@@ -47,7 +47,7 @@ private:
 public:
   LLVMBasedBackwardsICFG(LLVMBasedICFG &ICFG);
 
-  LLVMBasedBackwardsICFG(ProjectIRDB &IRDB, CallGraphAnalysisType CGType,
+  LLVMBasedBackwardsICFG(LLVMProjectIRDB &IRDB, CallGraphAnalysisType CGType,
                          const std::set<std::string> &EntryPoints = {},
                          LLVMTypeHierarchy *TH = nullptr,
                          LLVMPointsToInfo *PT = nullptr,

@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/SyncPDS/Solver/SyncPDSSolver.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToSet.h"
@@ -31,7 +31,7 @@ int main(int Argc, char **Argv) {
     std::cerr << "use programs in build/test/llvm_test_code/pointers/\n";
     return 1;
   }
-  ProjectIRDB DB({Argv[1]}, IRDBOptions::WPA);
+  LLVMProjectIRDB DB({Argv[1]}, IRDBOptions::WPA);
   LLVMTypeHierarchy H(DB);
   LLVMPointsToSet P(DB);
   LLVMBasedICFG ICFG(DB, CallGraphAnalysisType::OTF, {"main"}, &H, &P);

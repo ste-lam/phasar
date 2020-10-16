@@ -40,7 +40,7 @@ namespace psr {
 class LLVMBasedICFG;
 class LLVMPointsToInfo;
 class LLVMTypeHierarchy;
-class ProjectIRDB;
+class LLVMProjectIRDB;
 
 struct IDEPluginAnalysisDomain : public LLVMAnalysisDomainDefault {
   using l_t = const EdgeFact *;
@@ -52,7 +52,7 @@ class IDETabulationProblemPlugin
   using AnalysisDomainTy = IDEPluginAnalysisDomain;
 
 public:
-  IDETabulationProblemPlugin(const ProjectIRDB *IRDB,
+  IDETabulationProblemPlugin(const LLVMProjectIRDB *IRDB,
                              const LLVMTypeHierarchy *TH,
                              const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                              std::set<std::string> EntryPoints)
@@ -86,7 +86,7 @@ public:
 
 extern std::map<std::string,
                 std::unique_ptr<IDETabulationProblemPlugin> (*)(
-                    const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+                    const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                     std::set<std::string> EntryPoints)>
     IDETabulationProblemPluginFactory;

@@ -43,7 +43,7 @@
 #include "phasar/Utils/PAMMMacros.h"
 #include "phasar/Utils/Utilities.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToGraph.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToInfo.h"
@@ -89,7 +89,8 @@ LLVMBasedICFG::LLVMBasedICFG(const LLVMBasedICFG &ICF)
       Res(nullptr), VisitedFunctions(ICF.VisitedFunctions),
       CallGraph(ICF.CallGraph), FunctionVertexMap(ICF.FunctionVertexMap) {}
 
-LLVMBasedICFG::LLVMBasedICFG(ProjectIRDB &IRDB, CallGraphAnalysisType CGType,
+LLVMBasedICFG::LLVMBasedICFG(LLVMProjectIRDB &IRDB,
+                             CallGraphAnalysisType CGType,
                              const std::set<std::string> &EntryPoints,
                              LLVMTypeHierarchy *TH, LLVMPointsToInfo *PT,
                              SoundnessFlag SF)
@@ -114,7 +115,7 @@ LLVMBasedICFG::LLVMBasedICFG(ProjectIRDB &IRDB, CallGraphAnalysisType CGType,
                 << "Starting CallGraphAnalysisType: " << CGType);
   VisitedFunctions.reserve(IRDB.getAllFunctions().size());
   for (const auto &EntryPoint : EntryPoints) {
-    const llvm::Function *F = IRDB.getFunctionDefinition(EntryPoint);
+    llvm::Function *F = IRDB.getFunctionDefinition(EntryPoint);
     if (F == nullptr) {
       llvm::report_fatal_error("Could not retrieve function for entry point");
     }
@@ -234,7 +235,7 @@ void LLVMBasedICFG::constructionWalker(const llvm::Function *F,
   }
 }
 
-std::unique_ptr<Resolver> LLVMBasedICFG::makeResolver(ProjectIRDB &IRDB,
+std::unique_ptr<Resolver> LLVMBasedICFG::makeResolver(LLVMProjectIRDB &IRDB,
                                                       CallGraphAnalysisType CGT,
                                                       LLVMTypeHierarchy &TH,
                                                       LLVMPointsToInfo &PT) {
@@ -286,7 +287,11 @@ const llvm::Function *LLVMBasedICFG::getFunction(const string &Fun) const {
 }
 
 set<const llvm::Function *> LLVMBasedICFG::getAllFunctions() const {
-  return IRDB.getAllFunctions();
+  std::set<const llvm::Function *> AllFunctions;
+  for (auto F : IRDB.getAllFunctions()) {
+    AllFunctions.insert(F);
+  }
+  return AllFunctions;
 }
 
 boost::container::flat_set<const llvm::Function *>

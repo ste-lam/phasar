@@ -46,7 +46,7 @@ struct IntraMonoSolverTestAnalysisDomain : public LLVMAnalysisDomainDefault {
 class IntraMonoSolverTest
     : public IntraMonoProblem<IntraMonoSolverTestAnalysisDomain> {
 public:
-  IntraMonoSolverTest(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  IntraMonoSolverTest(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                       const LLVMBasedCFG *CF, const LLVMPointsToInfo *PT,
                       std::set<std::string> EntryPoints = {});
   ~IntraMonoSolverTest() override = default;

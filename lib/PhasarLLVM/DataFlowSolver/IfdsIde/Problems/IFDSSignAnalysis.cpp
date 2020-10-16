@@ -27,7 +27,7 @@ using namespace psr;
 
 namespace psr {
 
-IFDSSignAnalysis::IFDSSignAnalysis(const ProjectIRDB *IRDB,
+IFDSSignAnalysis::IFDSSignAnalysis(const LLVMProjectIRDB *IRDB,
                                    const LLVMTypeHierarchy *TH,
                                    const LLVMBasedICFG *ICF,
                                    LLVMPointsToInfo *PT,

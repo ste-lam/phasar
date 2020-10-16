@@ -24,7 +24,7 @@ using namespace psr;
 
 namespace psr {
 
-NOResolver::NOResolver(ProjectIRDB &IRDB) : Resolver(IRDB) {}
+NOResolver::NOResolver(LLVMProjectIRDB &IRDB) : Resolver(IRDB) {}
 
 void NOResolver::preCall(const llvm::Instruction *Inst) {}
 

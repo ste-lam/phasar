@@ -1,5 +1,5 @@
 #include "phasar/Config/Configuration.h"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/TypeHierarchy/LLVMTypeHierarchy.h"
 #include "phasar/Utils/LLVMShorthands.h"
@@ -11,7 +11,7 @@ using namespace std;
 using namespace psr;
 
 TEST(LLVMBasedICFG_DTATest, VirtualCallSite_5) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/virtual_call_5_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -39,7 +39,7 @@ TEST(LLVMBasedICFG_DTATest, VirtualCallSite_5) {
 }
 
 TEST(LLVMBasedICFG_DTATest, VirtualCallSite_6) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/virtual_call_6_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);

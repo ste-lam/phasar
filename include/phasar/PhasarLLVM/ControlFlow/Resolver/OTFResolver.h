@@ -36,7 +36,7 @@ class Value;
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 class LLVMBasedICFG;
 class LLVMTypeHierarchy;
 
@@ -47,7 +47,7 @@ protected:
   std::vector<const llvm::Instruction *> CallStack;
 
 public:
-  OTFResolver(ProjectIRDB &IRDB, LLVMTypeHierarchy &TH, LLVMBasedICFG &ICF,
+  OTFResolver(LLVMProjectIRDB &IRDB, LLVMTypeHierarchy &TH, LLVMBasedICFG &ICF,
               LLVMPointsToInfo &PT);
 
   ~OTFResolver() override = default;

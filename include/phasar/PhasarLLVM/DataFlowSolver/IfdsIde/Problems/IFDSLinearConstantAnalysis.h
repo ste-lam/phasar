@@ -62,7 +62,7 @@ struct IFDSLinearConstantAnalysisDomain : public LLVMAnalysisDomainDefault {
 class IFDSLinearConstantAnalysis
     : public IFDSTabulationProblem<IFDSLinearConstantAnalysisDomain> {
 public:
-  IFDSLinearConstantAnalysis(const ProjectIRDB *IRDB,
+  IFDSLinearConstantAnalysis(const LLVMProjectIRDB *IRDB,
                              const LLVMTypeHierarchy *TH,
                              const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                              std::set<std::string> EntryPoints = {"main"});

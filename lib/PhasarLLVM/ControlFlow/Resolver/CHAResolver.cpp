@@ -29,7 +29,7 @@
 using namespace std;
 using namespace psr;
 
-CHAResolver::CHAResolver(ProjectIRDB &IRDB, LLVMTypeHierarchy &TH)
+CHAResolver::CHAResolver(LLVMProjectIRDB &IRDB, LLVMTypeHierarchy &TH)
     : Resolver(IRDB, TH) {}
 
 set<const llvm::Function *>

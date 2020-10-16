@@ -17,7 +17,7 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/EdgeFunctionComposer.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/EdgeFunctions.h"
@@ -36,7 +36,7 @@ using namespace psr;
 
 namespace psr {
 
-IDETypeStateAnalysis::IDETypeStateAnalysis(const ProjectIRDB *IRDB,
+IDETypeStateAnalysis::IDETypeStateAnalysis(const LLVMProjectIRDB *IRDB,
                                            const LLVMTypeHierarchy *TH,
                                            const LLVMBasedICFG *ICF,
                                            LLVMPointsToInfo *PT,

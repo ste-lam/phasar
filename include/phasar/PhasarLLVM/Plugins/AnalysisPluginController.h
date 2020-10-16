@@ -18,7 +18,7 @@
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 class LLVMTypeHierarchy;
 class LLVMBasedICFG;
 class LLVMPointsToInfo;
@@ -26,7 +26,8 @@ class LLVMPointsToInfo;
 class AnalysisPluginController {
 public:
   AnalysisPluginController(const std::vector<std::string> &AnalysisPlygins,
-                           const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+                           const LLVMProjectIRDB *IRDB,
+                           const LLVMTypeHierarchy *TH,
                            const LLVMBasedICFG *ICF, const LLVMPointsToInfo *PT,
                            const std::set<std::string> &EntryPoints = {"main"});
 };

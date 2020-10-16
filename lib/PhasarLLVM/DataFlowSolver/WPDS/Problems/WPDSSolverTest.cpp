@@ -9,7 +9,7 @@
 
 #include <utility>
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/EdgeFunctions.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/FlowFunctions.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/LLVMZeroValue.h"
@@ -24,7 +24,7 @@ using namespace psr;
 
 namespace psr {
 
-WPDSSolverTest::WPDSSolverTest(const ProjectIRDB *IRDB,
+WPDSSolverTest::WPDSSolverTest(const LLVMProjectIRDB *IRDB,
                                const LLVMTypeHierarchy *TH,
                                const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                                std::set<std::string> EntryPoints)

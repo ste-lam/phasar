@@ -100,7 +100,7 @@ public:
   const l_t TOP;
   const l_t BOTTOM;
 
-  IDETypeStateAnalysis(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  IDETypeStateAnalysis(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                        const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                        const TypeStateDescription &TSD,
                        std::set<std::string> EntryPoints = {"main"});

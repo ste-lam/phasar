@@ -6,7 +6,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include "phasar/Config/Configuration.h"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/Passes/ValueAnnotationPass.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToSet.h"
@@ -25,7 +25,7 @@ protected:
       PhasarConfig::getPhasarConfig().PhasarDirectory() +
       "build/test/llvm_test_code/llvmIRtoSrc/";
 
-  ProjectIRDB *IRDB{};
+  LLVMProjectIRDB *IRDB{};
   LLVMTypeHierarchy *TH{};
   LLVMPointsToSet *PT{};
   LLVMBasedICFG *ICFG{};
@@ -34,7 +34,7 @@ protected:
   ~LLVMIRToSrcTest() override = default;
 
   void initialize(const std::vector<std::string> &IRFiles) {
-    IRDB = new ProjectIRDB(IRFiles, IRDBOptions::WPA);
+    IRDB = new LLVMProjectIRDB(IRFiles, IRDBOptions::WPA);
     TH = new LLVMTypeHierarchy(*IRDB);
     PT = new LLVMPointsToSet(*IRDB);
     ICFG =

@@ -28,7 +28,7 @@ using namespace psr;
 namespace psr {
 
 unique_ptr<IFDSTabulationProblemPlugin>
-makeIFDSSFB901TaintAnalysis(const ProjectIRDB *IRDB,
+makeIFDSSFB901TaintAnalysis(const LLVMProjectIRDB *IRDB,
                             const LLVMTypeHierarchy *TH,
                             const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                             std::set<std::string> EntryPoints) {
@@ -47,7 +47,7 @@ __attribute__((destructor)) void fini() {
 }
 
 IFDSSFB901TaintAnalysis::IFDSSFB901TaintAnalysis(
-    const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+    const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
     std::set<std::string> EntryPoints)
     : IFDSTabulationProblemPlugin(IRDB, TH, ICF, PT, std::move(EntryPoints)) {

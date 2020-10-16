@@ -42,7 +42,7 @@ class Value;
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 
 struct IFDSPluginAnalysisDomain : public LLVMAnalysisDomainDefault {
   using d_t = const FlowFact *;
@@ -53,7 +53,7 @@ class IFDSTabulationProblemPlugin
   using AnalysisDomainTy = IFDSPluginAnalysisDomain;
 
 public:
-  IFDSTabulationProblemPlugin(const ProjectIRDB *IRDB,
+  IFDSTabulationProblemPlugin(const LLVMProjectIRDB *IRDB,
                               const LLVMTypeHierarchy *TH,
                               const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                               std::set<std::string> EntryPoints)
@@ -79,7 +79,7 @@ public:
 
 extern std::map<std::string,
                 std::unique_ptr<IFDSTabulationProblemPlugin> (*)(
-                    const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+                    const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                     std::set<std::string> EntryPoints)>
     IFDSTabulationProblemPluginFactory;

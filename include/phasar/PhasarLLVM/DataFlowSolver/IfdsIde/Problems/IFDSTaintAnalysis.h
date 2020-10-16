@@ -62,7 +62,7 @@ public:
    * @param TSF
    * @param EntryPoints
    */
-  IFDSTaintAnalysis(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  IFDSTaintAnalysis(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                     const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                     const TaintConfiguration<const llvm::Value *> &TSF,
                     std::set<std::string> EntryPoints = {"main"});

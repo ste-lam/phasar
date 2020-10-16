@@ -46,7 +46,7 @@ public:
   using ConfigurationTy = TaintConfiguration<ExtendedValue>;
 
   IFDSFieldSensTaintAnalysis(
-      const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+      const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
       const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
       const TaintConfiguration<ExtendedValue> &TaintConfig,
       std::set<std::string> EntryPoints = {"main"});

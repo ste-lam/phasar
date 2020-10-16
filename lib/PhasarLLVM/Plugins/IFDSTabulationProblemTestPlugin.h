@@ -34,7 +34,7 @@ class IFDSTabulationProblemTestPlugin : public IFDSTabulationProblemPlugin {
   FlowFactManager<ValueFlowFactWrapper> ffManager;
 
 public:
-  IFDSTabulationProblemTestPlugin(const ProjectIRDB *IRDB,
+  IFDSTabulationProblemTestPlugin(const LLVMProjectIRDB *IRDB,
                                   const LLVMTypeHierarchy *TH,
                                   const LLVMBasedICFG *ICF,
                                   LLVMPointsToInfo *PT,
@@ -72,7 +72,7 @@ public:
 };
 
 extern "C" std::unique_ptr<IFDSTabulationProblemPlugin>
-makeIFDSTabulationProblemTestPlugin(const ProjectIRDB *IRDB,
+makeIFDSTabulationProblemTestPlugin(const LLVMProjectIRDB *IRDB,
                                     const LLVMTypeHierarchy *TH,
                                     const LLVMBasedICFG *ICF,
                                     const LLVMPointsToInfo *PT,

@@ -17,7 +17,7 @@
 #include "llvm/Support/ErrorHandling.h"
 
 #include "phasar/Controller/AnalysisController.h"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/AnalysisStrategy/Strategies.h"
 #include "phasar/PhasarLLVM/AnalysisStrategy/WholeProgramAnalysis.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDEInstInteractionAnalysis.h"
@@ -74,7 +74,7 @@ bool needsToEmitPTA(AnalysisControllerEmitterOptions EmitterOptions) {
 }
 
 AnalysisController::AnalysisController(
-    ProjectIRDB &IRDB, std::vector<DataFlowAnalysisKind> DataFlowAnalyses,
+    LLVMProjectIRDB &IRDB, std::vector<DataFlowAnalysisKind> DataFlowAnalyses,
     std::vector<std::string> AnalysisConfigs, PointerAnalysisType PTATy,
     CallGraphAnalysisType CGTy, SoundnessFlag SF,
     const std::set<std::string> &EntryPoints, AnalysisStrategy Strategy,

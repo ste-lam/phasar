@@ -21,7 +21,7 @@
 #include "boost/graph/graph_utility.hpp"
 #include "boost/graph/graphviz.hpp"
 
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedBackwardICFG.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/TypeHierarchy/LLVMTypeHierarchy.h"
@@ -41,7 +41,7 @@ LLVMBasedBackwardsICFG::LLVMBasedBackwardsICFG(LLVMBasedICFG &ICFG)
 }
 
 LLVMBasedBackwardsICFG::LLVMBasedBackwardsICFG(
-    ProjectIRDB &IRDB, CallGraphAnalysisType CGType,
+    LLVMProjectIRDB &IRDB, CallGraphAnalysisType CGType,
     const std::set<std::string> &EntryPoints, LLVMTypeHierarchy *TH,
     LLVMPointsToInfo *PT, SoundnessFlag SF)
     : ForwardICFG(IRDB, CGType, EntryPoints, TH, PT, SF) {

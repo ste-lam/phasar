@@ -30,7 +30,7 @@ namespace psr {
 class LLVMBasedICFG;
 class LLVMPointsToInfo;
 class LLVMTypeHierarchy;
-class ProjectIRDB;
+class LLVMProjectIRDB;
 
 struct WPDSSolverTestAnalysisDomain : public LLVMAnalysisDomainDefault {
   using l_t = BinaryDomain;
@@ -38,7 +38,7 @@ struct WPDSSolverTestAnalysisDomain : public LLVMAnalysisDomainDefault {
 
 class WPDSSolverTest : public WPDSProblem<WPDSSolverTestAnalysisDomain> {
 public:
-  WPDSSolverTest(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  WPDSSolverTest(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                  const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                  std::set<std::string> EntryPoints = {"main"});
 

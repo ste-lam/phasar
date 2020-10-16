@@ -27,7 +27,7 @@ class Instruction;
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 
 class LLVMBasedPointsToAnalysis {
 private:
@@ -44,7 +44,7 @@ private:
 
 public:
   LLVMBasedPointsToAnalysis(
-      ProjectIRDB &IRDB, bool UseLazyEvaluation = true,
+      LLVMProjectIRDB &IRDB, bool UseLazyEvaluation = true,
       PointerAnalysisType PATy = PointerAnalysisType::CFLAnders);
 
   ~LLVMBasedPointsToAnalysis() = default;

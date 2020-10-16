@@ -60,7 +60,7 @@ public:
   static const l_t TOP;
   static const l_t BOTTOM;
 
-  IDELinearConstantAnalysis(const ProjectIRDB *IRDB,
+  IDELinearConstantAnalysis(const LLVMProjectIRDB *IRDB,
                             const LLVMTypeHierarchy *TH,
                             const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                             std::set<std::string> EntryPoints = {"main"});

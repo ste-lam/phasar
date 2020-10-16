@@ -23,7 +23,7 @@ class IDETabulationProblemTestPlugin : public IDETabulationProblemPlugin {
   EdgeFactManager<IntEdgeFactWrapper> efManager;
 
 public:
-  IDETabulationProblemTestPlugin(const ProjectIRDB *IRDB,
+  IDETabulationProblemTestPlugin(const LLVMProjectIRDB *IRDB,
                                  const LLVMTypeHierarchy *TH,
                                  const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                                  std::set<std::string> EntryPoints);
@@ -78,7 +78,7 @@ public:
 };
 
 extern "C" std::unique_ptr<IDETabulationProblemPlugin>
-makeIDETabulationProblemtestPlugin(const ProjectIRDB *IRDB,
+makeIDETabulationProblemtestPlugin(const LLVMProjectIRDB *IRDB,
                                    const LLVMTypeHierarchy *TH,
                                    const LLVMBasedICFG *ICF,
                                    LLVMPointsToInfo *PT,

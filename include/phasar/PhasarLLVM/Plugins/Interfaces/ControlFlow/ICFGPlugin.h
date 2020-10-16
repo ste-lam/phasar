@@ -24,22 +24,22 @@ class Function;
 
 namespace psr {
 
-class ProjectIRDB;
+class LLVMProjectIRDB;
 
 class ICFGPlugin
     : public ICFG<const llvm::Instruction *, const llvm::Function *> {
 private:
-  [[maybe_unused]] ProjectIRDB &IRDB;
+  [[maybe_unused]] LLVMProjectIRDB &IRDB;
   const std::vector<std::string> EntryPoints;
 
 public:
-  ICFGPlugin(ProjectIRDB &IRDB, const std::vector<std::string> EntryPoints)
+  ICFGPlugin(LLVMProjectIRDB &IRDB, const std::vector<std::string> EntryPoints)
       : IRDB(IRDB), EntryPoints(move(EntryPoints)) {}
 };
 
-extern std::map<std::string,
-                std::unique_ptr<ICFGPlugin> (*)(
-                    ProjectIRDB &, const std::vector<std::string> &EntryPoints)>
+extern std::map<std::string, std::unique_ptr<ICFGPlugin> (*)(
+                                 LLVMProjectIRDB &,
+                                 const std::vector<std::string> &EntryPoints)>
     ICFGPluginFactory;
 
 } // namespace psr

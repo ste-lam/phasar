@@ -28,7 +28,7 @@ using namespace psr;
 
 namespace psr {
 
-IFDSSolverTest::IFDSSolverTest(const ProjectIRDB *IRDB,
+IFDSSolverTest::IFDSSolverTest(const LLVMProjectIRDB *IRDB,
                                const LLVMTypeHierarchy *TH,
                                const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                                std::set<std::string> EntryPoints)

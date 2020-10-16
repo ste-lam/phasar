@@ -32,7 +32,7 @@ namespace psr {
 class LLVMBasedICFG;
 class LLVMPointsToInfo;
 class LLVMTypeHierarchy;
-class ProjectIRDB;
+class LLVMProjectIRDB;
 
 struct WPDSAliasCollectorAnalysisDomain : public LLVMAnalysisDomainDefault {
   using l_t = BinaryDomain;
@@ -41,7 +41,7 @@ struct WPDSAliasCollectorAnalysisDomain : public LLVMAnalysisDomainDefault {
 class WPDSAliasCollector
     : public WPDSProblem<WPDSAliasCollectorAnalysisDomain> {
 public:
-  WPDSAliasCollector(const ProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
+  WPDSAliasCollector(const LLVMProjectIRDB *IRDB, const LLVMTypeHierarchy *TH,
                      const LLVMBasedICFG *ICF, LLVMPointsToInfo *PT,
                      std::set<std::string> EntryPoints);
 

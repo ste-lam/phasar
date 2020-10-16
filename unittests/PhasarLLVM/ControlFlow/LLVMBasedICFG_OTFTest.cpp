@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "phasar/Config/Configuration.h"
-#include "phasar/DB/ProjectIRDB.h"
+#include "phasar/DB/LLVMProjectIRDB.h"
 #include "phasar/PhasarLLVM/ControlFlow/LLVMBasedICFG.h"
 #include "phasar/PhasarLLVM/Pointer/LLVMPointsToSet.h"
 #include "phasar/PhasarLLVM/TypeHierarchy/LLVMTypeHierarchy.h"
@@ -13,7 +13,7 @@ using namespace std;
 using namespace psr;
 
 TEST(LLVMBasedICFG_OTFTest, VirtualCallSite_7) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/virtual_call_7_cpp.ll"},
       IRDBOptions::WPA);
   IRDB.emitPreprocessedIR();
@@ -66,7 +66,7 @@ TEST(LLVMBasedICFG_OTFTest, VirtualCallSite_7) {
 // }
 
 TEST(LLVMBasedICFG_OTFTest, FunctionPtrCall_2) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/function_pointer_2_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
@@ -84,7 +84,7 @@ TEST(LLVMBasedICFG_OTFTest, FunctionPtrCall_2) {
 }
 
 TEST(LLVMBasedICFG_OTFTest, FunctionPtrCall_3) {
-  ProjectIRDB IRDB(
+  LLVMProjectIRDB IRDB(
       {unittest::PathToLLTestFiles + "call_graphs/function_pointer_3_cpp.ll"},
       IRDBOptions::WPA);
   LLVMTypeHierarchy TH(IRDB);
