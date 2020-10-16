@@ -451,7 +451,7 @@ void LLVMProjectIRDB::insertModule(llvm::Module *M) {
   preprocessModule(M);
 }
 
-llvm::StructType *
+llvm::Type *
 LLVMProjectIRDB::getStructType(const std::string &TypeName) const {
   /// Returns the struct type's definition if available, its declaration
   /// otherwise.
@@ -459,15 +459,15 @@ LLVMProjectIRDB::getStructType(const std::string &TypeName) const {
   return nullptr;
 }
 
-llvm::StructType *
+llvm::Type *
 LLVMProjectIRDB::getStructTypeDefinition(const std::string &TypeName) const {
   /// Returns the struct type's definition if available, null otherwise.
   // TODO: implement
   return nullptr;
 }
 
-std::set<llvm::StructType *> LLVMProjectIRDB::getAllocatedStructTypes() const {
-  std::set<llvm::StructType *> StructTypes;
+std::set<llvm::Type *> LLVMProjectIRDB::getAllocatedStructTypes() const {
+  std::set<llvm::Type *> StructTypes;
   for (auto *Ty : AllocatedTypes) {
     if (auto *StructTy = llvm::dyn_cast<llvm::StructType>(Ty)) {
       StructTypes.insert(StructTy);

@@ -29,6 +29,7 @@ namespace llvm {
 class Value;
 class Instruction;
 class Type;
+class StructType;
 class Function;
 class GlobalVariable;
 } // namespace llvm
@@ -42,7 +43,7 @@ namespace psr {
 class LLVMProjectIRDB
     : public ProjectIRDB<llvm::Module *, llvm::Function *, llvm::Instruction *,
                          llvm::GlobalVariable *, llvm::Type *,
-                         llvm::StructType *, llvm::Value *> {
+                         llvm::Value *> {
 private:
   llvm::Module *WPAModule = nullptr;
   IRDBOptions Options;
@@ -150,7 +151,7 @@ public:
     return AllocatedTypes;
   };
 
-  [[nodiscard]] std::set<llvm::StructType *>
+  [[nodiscard]] std::set<llvm::Type *>
   getAllocatedStructTypes() const override;
 
   [[nodiscard]] std::set<llvm::Instruction *>
@@ -158,9 +159,9 @@ public:
     return RetOrResInstructions;
   };
 
-  llvm::StructType *getStructType(const std::string &TypeName) const override;
+  llvm::Type *getStructType(const std::string &TypeName) const override;
 
-  llvm::StructType *
+  llvm::Type *
   getStructTypeDefinition(const std::string &TypeName) const override;
 
   [[nodiscard]] std::size_t getNumberOfModules() const override {

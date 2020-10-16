@@ -29,11 +29,10 @@ enum class IRDBOptions : uint32_t { NONE = 0, WPA = (1 << 0), OWNS = (1 << 1) };
 /// N - instruction type
 /// G - global variable type
 /// T - data type type
-/// S - struct data type type
 /// V - value type
 ///
 template <typename M, typename F, typename N, typename G, typename T,
-          typename S, typename V>
+          typename V>
 class ProjectIRDB {
 public:
   virtual ~ProjectIRDB() = default;
@@ -89,16 +88,16 @@ public:
 
   /// Returns the struct type's definition if available, its declaration
   /// otherwise.
-  virtual S getStructType(const std::string &TypeName) const = 0;
+  virtual T getStructType(const std::string &TypeName) const = 0;
 
   /// Returns the struct type's definition if available, null otherwise.
-  virtual S getStructTypeDefinition(const std::string &TypeName) const = 0;
+  virtual T getStructTypeDefinition(const std::string &TypeName) const = 0;
 
   /// Returns all allocated types.
   virtual std::set<T> getAllocatedTypes() const = 0;
 
   /// Returns all allocated struct types.
-  virtual std::set<S> getAllocatedStructTypes() const = 0;
+  virtual std::set<T> getAllocatedStructTypes() const = 0;
 
   /// Returns all source files managed by this ProjectIRDB.
   virtual std::set<std::string> getAllSourceFiles() const = 0;
