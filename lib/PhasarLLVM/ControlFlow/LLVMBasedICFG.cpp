@@ -115,7 +115,7 @@ LLVMBasedICFG::LLVMBasedICFG(LLVMProjectIRDB &IRDB,
                 << "Starting CallGraphAnalysisType: " << CGType);
   VisitedFunctions.reserve(IRDB.getAllFunctions().size());
   for (const auto &EntryPoint : EntryPoints) {
-    llvm::Function *F = IRDB.getFunctionDefinition(EntryPoint);
+    const llvm::Function *F = IRDB.getFunctionDefinition(EntryPoint);
     if (F == nullptr) {
       llvm::report_fatal_error("Could not retrieve function for entry point");
     }
