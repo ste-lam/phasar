@@ -127,16 +127,6 @@ void LLVMProjectIRDB::preprocessModule(llvm::Module *M) {
   auto GSPResult = MAM.getResult<GeneralStatisticsAnalysis>(*M);
   auto Allocas = GSPResult.getAllocaInstructions();
   AllocaInstructions.insert(Allocas.begin(), Allocas.end());
-
-  // Problem:
-  // Allocas contains const llvm::Instruction * elements
-  // and AllocaInstructions is of type std::set<llvm::Instruction *>
-
-  // possible fix
-  // for (auto Alloca : Allocas) {
-  //   AllocaInstructions.insert(const_cast<llvm::Instruction *>(Alloca));
-  // }
-
   auto ATypes = GSPResult.getAllocatedTypes();
   AllocatedTypes.insert(ATypes.begin(), ATypes.end());
   auto RRInsts = GSPResult.getRetResInstructions();

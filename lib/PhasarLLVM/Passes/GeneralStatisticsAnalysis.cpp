@@ -17,6 +17,7 @@
 #include <string>
 
 #include "llvm/Analysis/LoopInfo.h"
+#include "llvm/Demangle/Demangle.h"
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IntrinsicInst.h"
@@ -47,19 +48,19 @@ GeneralStatisticsAnalysis::run(llvm::Module &M,
       "operator new(unsigned long)", "operator new[](unsigned long)", "malloc",
       "calloc", "realloc"};
   for (auto &F : M) {
-    ++Stats.functions;
+    ++Stats.NumFunctions;
     for (auto &BB : F) {
-      ++Stats.basicblocks;
+      ++Stats.NumBasicBlocks;
       for (auto &I : BB) {
         // found one more instruction
-        ++Stats.instructions;
+        ++Stats.NumInstructions;
         // check for alloca instruction for possible types
         if (const llvm::AllocaInst *Alloc =
                 llvm::dyn_cast<llvm::AllocaInst>(&I)) {
-          Stats.allocatedTypes.insert(Alloc->getAllocatedType());
-          // do not add allocas from llvm internal functions
-          Stats.allocaInstructions.insert(&I);
-          ++Stats.allocationsites;
+          Stats.AllocatedTypes.insert(Alloc->getAllocatedType());
+          // do not add allocas from llvm internal NumFunctions
+          Stats.AllocaInstructions.insert(&I);
+          ++Stats.NumAllocationSites;
         } // check bitcast instructions for possible types
         else {
           for (auto *User : I.users()) {
@@ -71,30 +72,30 @@ GeneralStatisticsAnalysis::run(llvm::Module &M,
         }
         // check for return or resume instructions
         if (llvm::isa<llvm::ReturnInst>(I) || llvm::isa<llvm::ResumeInst>(I)) {
-          Stats.retResInstructions.insert(&I);
+          Stats.RetResInstructions.insert(&I);
         }
         // check for store instructions
         if (llvm::isa<llvm::StoreInst>(I)) {
-          ++Stats.storeInstructions;
+          ++Stats.NumStoreInstructions;
         }
         // check for load instructions
         if (llvm::isa<llvm::LoadInst>(I)) {
-          ++Stats.loadInstructions;
+          ++Stats.NumLoadInstructions;
         }
         // check for llvm's memory intrinsics
         if (llvm::isa<llvm::MemIntrinsic>(I)) {
-          ++Stats.memIntrinsic;
+          ++Stats.NumMemIntrinsics;
         }
         // check for function calls
         if (llvm::isa<llvm::CallInst>(I) || llvm::isa<llvm::InvokeInst>(I)) {
-          ++Stats.callsites;
+          ++Stats.NumCallSites;
           llvm::ImmutableCallSite CS(&I);
           if (CS.getCalledFunction()) {
             if (MemAllocatingFunctions.count(
-                    cxxDemangle(CS.getCalledFunction()->getName().str()))) {
+                    llvm::demangle(CS.getCalledFunction()->getName().str()))) {
               // do not add allocas from llvm internal functions
-              Stats.allocaInstructions.insert(&I);
-              ++Stats.allocationsites;
+              Stats.AllocaInstructions.insert(&I);
+              ++Stats.NumAllocationSites;
               // check if an instance of a user-defined type is allocated on the
               // heap
               for (auto *User : I.users()) {
@@ -111,7 +112,7 @@ GeneralStatisticsAnalysis::run(llvm::Module &M,
                         if (CTor.getCalledFunction() &&
                             getNthFunctionArgument(CTor.getCalledFunction(), 0)
                                     ->getType() == Cast->getDestTy()) {
-                          Stats.allocatedTypes.insert(
+                          Stats.AllocatedTypes.insert(
                               Cast->getDestTy()->getPointerElementType());
                         }
                       }
@@ -128,29 +129,31 @@ GeneralStatisticsAnalysis::run(llvm::Module &M,
   // check for global pointers
   for (auto &Global : M.globals()) {
     if (Global.getType()->isPointerTy()) {
-      ++Stats.globalPointers;
+      ++Stats.NumGlobalPointers;
     }
-    ++Stats.globals;
+    ++Stats.NumGlobals;
   }
   // register stuff in PAMM
   // For performance reasons (and out of sheer convenience) we simply initialize
   // the counter with the values of the counter varibles, i.e. PAMM simply
   // holds the results.
   PAMM_GET_INSTANCE;
-  REG_COUNTER("GS Instructions", instructions, PAMM_SEVERITY_LEVEL::Core);
-  REG_COUNTER("GS Allocated Types", allocatedTypes.size(),
+  REG_COUNTER("GS Instructions", NumInstructions, PAMM_SEVERITY_LEVEL::Core);
+  REG_COUNTER("GS Allocated Types", AllocatedTypes.size(),
               PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Allocation-Sites", allocationsites,
+  REG_COUNTER("GS Allocation-Sites", NumAllocationSites,
               PAMM_SEVERITY_LEVEL::Core);
-  REG_COUNTER("GS Basic Blocks", basicblocks, PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Call-Sites", callsites, PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Functions", functions, PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Globals", globals, PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Global Pointer", globalPointers, PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Memory Intrinsics", memIntrinsic, PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Store Instructions", storeInstructions,
+  REG_COUNTER("GS Basic Blocks", NumBasicBlocks, PAMM_SEVERITY_LEVEL::Full);
+  REG_COUNTER("GS Call-Sites", NumCallSites, PAMM_SEVERITY_LEVEL::Full);
+  REG_COUNTER("GS Functions", NumFunctions, PAMM_SEVERITY_LEVEL::Full);
+  REG_COUNTER("GS Globals", NumGlobals, PAMM_SEVERITY_LEVEL::Full);
+  REG_COUNTER("GS Global Pointer", NumGlobalPointers,
               PAMM_SEVERITY_LEVEL::Full);
-  REG_COUNTER("GS Load Instructions", loadInstructions,
+  REG_COUNTER("GS Memory Intrinsics", NumMemIntrinsics,
+              PAMM_SEVERITY_LEVEL::Full);
+  REG_COUNTER("GS Store Instructions", NumStoreInstructions,
+              PAMM_SEVERITY_LEVEL::Full);
+  REG_COUNTER("GS Load Instructions", NumLoadInstructions,
               PAMM_SEVERITY_LEVEL::Full);
   // Using the logging guard explicitly since we are printing allocated types
   // manually
@@ -159,26 +162,27 @@ GeneralStatisticsAnalysis::run(llvm::Module &M,
         << "GeneralStatisticsAnalysis summary for module: '"
         << M.getName().str() << "'";
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Instructions       : " << Stats.instructions;
+        << "Instructions       : " << Stats.NumInstructions;
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Allocated Types    : " << Stats.allocatedTypes.size();
+        << "Allocated Types    : " << Stats.AllocatedTypes.size();
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Allocation Sites   : " << Stats.allocationsites;
+        << "Allocation Sites   : " << Stats.NumAllocationSites;
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Basic Blocks       : " << Stats.basicblocks;
+        << "Basic Blocks       : " << Stats.NumBasicBlocks;
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Calls Sites        : " << Stats.callsites;
+        << "Calls Sites        : " << Stats.NumCallSites;
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Functions          : " << Stats.functions;
-    BOOST_LOG_SEV(lg::get(), INFO) << "Globals            : " << Stats.globals;
+        << "Functions          : " << Stats.NumFunctions;
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Global Pointer     : " << Stats.globalPointers;
+        << "Globals            : " << Stats.NumGlobals;
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Memory Intrinsics  : " << Stats.memIntrinsic;
+        << "Global Pointer     : " << Stats.NumGlobalPointers;
     BOOST_LOG_SEV(lg::get(), INFO)
-        << "Store Instructions : " << Stats.storeInstructions;
+        << "Memory Intrinsics  : " << Stats.NumMemIntrinsics;
+    BOOST_LOG_SEV(lg::get(), INFO)
+        << "Store Instructions : " << Stats.NumStoreInstructions;
     BOOST_LOG_SEV(lg::get(), INFO) << ' ';
-    for (const auto *Type : Stats.allocatedTypes) {
+    for (const auto *Type : Stats.AllocatedTypes) {
       std::string TypeStr;
       llvm::raw_string_ostream Rso(TypeStr);
       Type->print(Rso);
@@ -189,38 +193,42 @@ GeneralStatisticsAnalysis::run(llvm::Module &M,
   return Stats;
 }
 
-size_t GeneralStatistics::getAllocationsites() const { return allocationsites; }
+size_t GeneralStatistics::getAllocationsites() const {
+  return NumAllocationSites;
+}
 
-size_t GeneralStatistics::getFunctioncalls() const { return callsites; }
+size_t GeneralStatistics::getFunctioncalls() const { return NumCallSites; }
 
-size_t GeneralStatistics::getInstructions() const { return instructions; }
+size_t GeneralStatistics::getInstructions() const { return NumInstructions; }
 
-size_t GeneralStatistics::getGlobalPointers() const { return globalPointers; }
+size_t GeneralStatistics::getGlobalPointers() const {
+  return NumGlobalPointers;
+}
 
-size_t GeneralStatistics::getBasicBlocks() const { return basicblocks; }
+size_t GeneralStatistics::getBasicBlocks() const { return NumBasicBlocks; }
 
-size_t GeneralStatistics::getFunctions() const { return functions; }
+size_t GeneralStatistics::getFunctions() const { return NumFunctions; }
 
-size_t GeneralStatistics::getGlobals() const { return globals; }
+size_t GeneralStatistics::getGlobals() const { return NumGlobals; }
 
-size_t GeneralStatistics::getMemoryIntrinsics() const { return memIntrinsic; }
+size_t GeneralStatistics::getMemoryIntrinsics() const {
+  return NumMemIntrinsics;
+}
 
 size_t GeneralStatistics::getStoreInstructions() const {
-  return storeInstructions;
+  return NumStoreInstructions;
 }
 
-set<const llvm::Type *> GeneralStatistics::getAllocatedTypes() const {
-  return allocatedTypes;
+set<llvm::Type *> GeneralStatistics::getAllocatedTypes() const {
+  return AllocatedTypes;
 }
 
-set<const llvm::Instruction *>
-GeneralStatistics::getAllocaInstructions() const {
-  return allocaInstructions;
+set<llvm::Instruction *> GeneralStatistics::getAllocaInstructions() const {
+  return AllocaInstructions;
 }
 
-set<const llvm::Instruction *>
-GeneralStatistics::getRetResInstructions() const {
-  return retResInstructions;
+set<llvm::Instruction *> GeneralStatistics::getRetResInstructions() const {
+  return RetResInstructions;
 }
 
 } // namespace psr

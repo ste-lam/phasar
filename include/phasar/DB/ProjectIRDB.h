@@ -29,7 +29,7 @@ enum class IRDBOptions : uint32_t { NONE = 0, WPA = (1 << 0), OWNS = (1 << 1) };
 /// N - instruction type
 /// G - global variable type
 /// T - data type type
-/// S - second data type type
+/// S - struct data type type
 /// V - value type
 ///
 template <typename M, typename F, typename N, typename G, typename T,

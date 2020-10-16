@@ -34,19 +34,19 @@ namespace psr {
 class GeneralStatistics {
 private:
   friend class GeneralStatisticsAnalysis;
-  size_t functions = 0;
-  size_t globals = 0;
-  size_t basicblocks = 0;
-  size_t allocationsites = 0;
-  size_t callsites = 0;
-  size_t instructions = 0;
-  size_t storeInstructions = 0;
-  size_t loadInstructions = 0;
-  size_t memIntrinsic = 0;
-  size_t globalPointers = 0;
-  std::set<const llvm::Type *> allocatedTypes;
-  std::set<const llvm::Instruction *> allocaInstructions;
-  std::set<const llvm::Instruction *> retResInstructions;
+  size_t NumFunctions = 0;
+  size_t NumGlobals = 0;
+  size_t NumBasicBlocks = 0;
+  size_t NumAllocationSites = 0;
+  size_t NumCallSites = 0;
+  size_t NumInstructions = 0;
+  size_t NumStoreInstructions = 0;
+  size_t NumLoadInstructions = 0;
+  size_t NumMemIntrinsics = 0;
+  size_t NumGlobalPointers = 0;
+  std::set<llvm::Type *> AllocatedTypes;
+  std::set<llvm::Instruction *> AllocaInstructions;
+  std::set<llvm::Instruction *> RetResInstructions;
 
 public:
   /**
@@ -102,17 +102,17 @@ public:
   /**
    * @brief Returns all possible Types.
    */
-  std::set<const llvm::Type *> getAllocatedTypes() const;
+  std::set<llvm::Type *> getAllocatedTypes() const;
 
   /**
    * @brief Returns all stack and heap allocating instructions.
    */
-  std::set<const llvm::Instruction *> getAllocaInstructions() const;
+  std::set<llvm::Instruction *> getAllocaInstructions() const;
 
   /**
    * @brief Returns all Return and Resume Instructions.
    */
-  std::set<const llvm::Instruction *> getRetResInstructions() const;
+  std::set<llvm::Instruction *> getRetResInstructions() const;
 };
 
 /**

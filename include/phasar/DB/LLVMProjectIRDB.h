@@ -167,14 +167,14 @@ public:
     return Modules.size();
   };
 
-  [[nodiscard]] llvm::Instruction *getInstruction(std::size_t id) override;
+  [[nodiscard]] llvm::Instruction *getInstruction(std::size_t ID) override;
 
   [[nodiscard]] std::size_t
   getInstructionID(llvm::Instruction *I) const override;
 
   void print(std::ostream &OS = std::cout) const override;
 
-  void emitPreprocessedIR(std::ostream &os = std::cout,
+  void emitPreprocessedIR(std::ostream &OS = std::cout,
                           bool ShortenIR = true) const override;
 
   /**
