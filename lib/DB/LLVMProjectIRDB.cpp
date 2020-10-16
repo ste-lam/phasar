@@ -56,7 +56,7 @@ LLVMProjectIRDB::LLVMProjectIRDB(IRDBOptions Options) : Options(Options) {
 }
 
 LLVMProjectIRDB::LLVMProjectIRDB(const std::vector<std::string> &IRFiles,
-                         IRDBOptions Options)
+                                 IRDBOptions Options)
     : LLVMProjectIRDB(Options | IRDBOptions::OWNS) {
   for (const auto &File : IRFiles) {
     // if we have a file that is already compiled to llvm ir
@@ -93,7 +93,7 @@ LLVMProjectIRDB::LLVMProjectIRDB(const std::vector<std::string> &IRFiles,
 }
 
 LLVMProjectIRDB::LLVMProjectIRDB(const std::vector<llvm::Module *> &Modules,
-                         IRDBOptions Options)
+                                 IRDBOptions Options)
     : LLVMProjectIRDB(Options) {
   for (auto *M : Modules) {
     insertModule(M);
@@ -127,6 +127,16 @@ void LLVMProjectIRDB::preprocessModule(llvm::Module *M) {
   auto GSPResult = MAM.getResult<GeneralStatisticsAnalysis>(*M);
   auto Allocas = GSPResult.getAllocaInstructions();
   AllocaInstructions.insert(Allocas.begin(), Allocas.end());
+
+  // Problem:
+  // Allocas contains const llvm::Instruction * elements
+  // and AllocaInstructions is of type std::set<llvm::Instruction *>
+
+  // possible fix
+  // for (auto Alloca : Allocas) {
+  //   AllocaInstructions.insert(const_cast<llvm::Instruction *>(Alloca));
+  // }
+
   auto ATypes = GSPResult.getAllocatedTypes();
   AllocatedTypes.insert(ATypes.begin(), ATypes.end());
   auto RRInsts = GSPResult.getRetResInstructions();
@@ -237,7 +247,7 @@ llvm::Instruction *LLVMProjectIRDB::getInstruction(std::size_t Id) {
   return nullptr;
 }
 
-std::size_t LLVMProjectIRDB::getInstructionID(const llvm::Instruction *I) {
+std::size_t LLVMProjectIRDB::getInstructionID(llvm::Instruction *I) const {
   std::size_t Id = 0;
   if (auto *MD = llvm::cast<llvm::MDString>(
           I->getMetadata(PhasarConfig::MetaDataKind())->getOperand(0))) {
@@ -246,14 +256,15 @@ std::size_t LLVMProjectIRDB::getInstructionID(const llvm::Instruction *I) {
   return Id;
 }
 
-void LLVMProjectIRDB::print() const {
+void LLVMProjectIRDB::print(std::ostream &OS) const {
   for (const auto &[File, Module] : Modules) {
     std::cout << "Module: " << File << std::endl;
     llvm::outs() << *Module;
   }
 }
 
-void LLVMProjectIRDB::emitPreprocessedIR(std::ostream &OS, bool ShortenIR) const {
+void LLVMProjectIRDB::emitPreprocessedIR(std::ostream &OS,
+                                         bool ShortenIR) const {
   for (const auto &[File, Module] : Modules) {
     OS << "IR module: " << File << '\n';
     // print globals
@@ -296,7 +307,7 @@ void LLVMProjectIRDB::emitPreprocessedIR(std::ostream &OS, bool ShortenIR) const
   }
 }
 
-const llvm::Function *
+llvm::Function *
 LLVMProjectIRDB::getFunctionDefinition(const string &FunctionName) const {
   for (const auto &[File, Module] : Modules) {
     auto *F = Module->getFunction(FunctionName);
@@ -307,7 +318,7 @@ LLVMProjectIRDB::getFunctionDefinition(const string &FunctionName) const {
   return nullptr;
 }
 
-const llvm::Function *
+llvm::Function *
 LLVMProjectIRDB::getFunction(const std::string &FunctionName) const {
   for (const auto &[File, Module] : Modules) {
     auto *F = Module->getFunction(FunctionName);
@@ -318,7 +329,18 @@ LLVMProjectIRDB::getFunction(const std::string &FunctionName) const {
   return nullptr;
 }
 
-const llvm::GlobalVariable *LLVMProjectIRDB::getGlobalVariableDefinition(
+llvm::GlobalVariable *LLVMProjectIRDB::getGlobalVariable(
+    const std::string &GlobalVariableName) const {
+  for (const auto &[File, Module] : Modules) {
+    auto *G = Module->getGlobalVariable(GlobalVariableName);
+    if (G) {
+      return G;
+    }
+  }
+  return nullptr;
+}
+
+llvm::GlobalVariable *LLVMProjectIRDB::getGlobalVariableDefinition(
     const std::string &GlobalVariableName) const {
   for (const auto &[File, Module] : Modules) {
     auto *G = Module->getGlobalVariable(GlobalVariableName);
@@ -329,8 +351,8 @@ const llvm::GlobalVariable *LLVMProjectIRDB::getGlobalVariableDefinition(
   return nullptr;
 }
 
-llvm::Module *
-LLVMProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) {
+llvm::Module *LLVMProjectIRDB::getModuleDefiningFunction(
+    const std::string &FunctionName) const {
   for (auto &[File, Module] : Modules) {
     auto *F = Module->getFunction(FunctionName);
     if (F && !F->isDeclaration()) {
@@ -340,18 +362,7 @@ LLVMProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) {
   return nullptr;
 }
 
-const llvm::Module *
-LLVMProjectIRDB::getModuleDefiningFunction(const std::string &FunctionName) const {
-  for (const auto &[File, Module] : Modules) {
-    auto *F = Module->getFunction(FunctionName);
-    if (F && !F->isDeclaration()) {
-      return Module.get();
-    }
-  }
-  return nullptr;
-}
-
-std::string LLVMProjectIRDB::valueToPersistedString(const llvm::Value *V) {
+std::string LLVMProjectIRDB::valueToPersistedString(llvm::Value *V) const {
   if (LLVMZeroValue::getInstance()->isLLVMZeroValue(V)) {
     return LLVMZeroValue::getInstance()->getName();
   } else if (const auto *I = llvm::dyn_cast<llvm::Instruction>(V)) {
@@ -391,7 +402,7 @@ std::string LLVMProjectIRDB::valueToPersistedString(const llvm::Value *V) {
   }
 }
 
-const llvm::Value *
+llvm::Value *
 LLVMProjectIRDB::persistedStringToValue(const std::string &S) const {
   if (S.find(LLVMZeroValue::getInstance()->getName()) != std::string::npos) {
     return LLVMZeroValue::getInstance();
@@ -399,8 +410,8 @@ LLVMProjectIRDB::persistedStringToValue(const std::string &S) const {
     return getGlobalVariableDefinition(S);
   } else if (S.find(".f") != std::string::npos) {
     unsigned Argno = stoi(S.substr(S.find(".f") + 2, S.size()));
-    return getNthFunctionArgument(
-        getFunctionDefinition(S.substr(0, S.find(".f"))), Argno);
+    return const_cast<llvm::Argument *>(getNthFunctionArgument(
+        getFunctionDefinition(S.substr(0, S.find(".f"))), Argno));
   } else if (S.find(".o.") != std::string::npos) {
     unsigned I = S.find('.');
     unsigned J = S.find(".o.");
@@ -408,9 +419,9 @@ LLVMProjectIRDB::persistedStringToValue(const std::string &S) const {
     // std::cout << "FOUND instID: " << instID << "\n";
     unsigned OpIdx = stoi(S.substr(J + 3, S.size()));
     // std::cout << "FOUND opIdx: " << to_string(opIdx) << "\n";
-    const llvm::Function *F = getFunctionDefinition(S.substr(0, S.find('.')));
-    for (const auto &BB : *F) {
-      for (const auto &Inst : BB) {
+    llvm::Function *F = getFunctionDefinition(S.substr(0, S.find('.')));
+    for (auto &BB : *F) {
+      for (auto &Inst : BB) {
         if (getMetaDataID(&Inst) == std::to_string(InstID)) {
           return Inst.getOperand(OpIdx);
         }
@@ -418,9 +429,9 @@ LLVMProjectIRDB::persistedStringToValue(const std::string &S) const {
     }
     llvm::report_fatal_error("Error: operand not found.");
   } else if (S.find('.') != std::string::npos) {
-    const llvm::Function *F = getFunctionDefinition(S.substr(0, S.find('.')));
-    for (const auto &BB : *F) {
-      for (const auto &Inst : BB) {
+    llvm::Function *F = getFunctionDefinition(S.substr(0, S.find('.')));
+    for (auto &BB : *F) {
+      for (auto &Inst : BB) {
         if (getMetaDataID(&Inst) == S.substr(S.find('.') + 1, S.size())) {
           return &Inst;
         }
@@ -434,9 +445,9 @@ LLVMProjectIRDB::persistedStringToValue(const std::string &S) const {
   return nullptr;
 }
 
-std::set<const llvm::Function *> LLVMProjectIRDB::getAllFunctions() const {
-  std::set<const llvm::Function *> Functions;
-  for (const auto &[File, Module] : Modules) {
+std::set<llvm::Function *> LLVMProjectIRDB::getAllFunctions() const {
+  std::set<llvm::Function *> Functions;
+  for (auto &[File, Module] : Modules) {
     for (auto &F : *Module) {
       Functions.insert(&F);
     }
@@ -450,23 +461,37 @@ void LLVMProjectIRDB::insertModule(llvm::Module *M) {
   preprocessModule(M);
 }
 
-std::set<const llvm::StructType *>
-LLVMProjectIRDB::getAllocatedStructTypes() const {
-  std::set<const llvm::StructType *> StructTypes;
-  for (const auto *Ty : AllocatedTypes) {
-    if (const auto *StructTy = llvm::dyn_cast<llvm::StructType>(Ty)) {
+llvm::StructType *
+LLVMProjectIRDB::getStructType(const std::string &TypeName) const {
+  /// Returns the struct type's definition if available, its declaration
+  /// otherwise.
+  // TODO: implement
+  return nullptr;
+}
+
+llvm::StructType *
+LLVMProjectIRDB::getStructTypeDefinition(const std::string &TypeName) const {
+  /// Returns the struct type's definition if available, null otherwise.
+  // TODO: implement
+  return nullptr;
+}
+
+std::set<llvm::StructType *> LLVMProjectIRDB::getAllocatedStructTypes() const {
+  std::set<llvm::StructType *> StructTypes;
+  for (auto *Ty : AllocatedTypes) {
+    if (auto *StructTy = llvm::dyn_cast<llvm::StructType>(Ty)) {
       StructTypes.insert(StructTy);
     }
   }
   return StructTypes;
 }
 
-set<const llvm::Value *> LLVMProjectIRDB::getAllMemoryLocations() const {
+set<llvm::Value *> LLVMProjectIRDB::getAllMemoryLocations() const {
   // get all stack and heap alloca instructions
   auto AllocaInsts = getAllocaInstructions();
-  set<const llvm::Value *> AllMemoryLoc;
-  for (const auto *AllocaInst : AllocaInsts) {
-    AllMemoryLoc.insert(static_cast<const llvm::Value *>(AllocaInst));
+  set<llvm::Value *> AllMemoryLoc;
+  for (auto *AllocaInst : AllocaInsts) {
+    AllMemoryLoc.insert(AllocaInst);
   }
   set<string> IgnoredGlobalNames = {"llvm.used",
                                     "llvm.compiler.used",
@@ -476,7 +501,7 @@ set<const llvm::Value *> LLVMProjectIRDB::getAllMemoryLocations() const {
                                     "typeinfo"};
   // add global varibales to the memory location set, except the llvm
   // intrinsic global variables
-  for (const auto &[File, Module] : Modules) {
+  for (auto &[File, Module] : Modules) {
     for (auto &GV : Module->globals()) {
       if (GV.hasName()) {
         string GVName = cxxDemangle(GV.getName().str());
@@ -487,6 +512,14 @@ set<const llvm::Value *> LLVMProjectIRDB::getAllMemoryLocations() const {
     }
   }
   return AllMemoryLoc;
+}
+
+std::set<std::string> LLVMProjectIRDB::getAllSourceFiles() const {
+  std::set<std::string> AllSourceFiles;
+  for (auto &Element : Modules) {
+    AllSourceFiles.insert(Element.first);
+  }
+  return AllSourceFiles;
 }
 
 bool LLVMProjectIRDB::hasDebugInfo() const {

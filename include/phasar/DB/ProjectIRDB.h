@@ -29,19 +29,20 @@ enum class IRDBOptions : uint32_t { NONE = 0, WPA = (1 << 0), OWNS = (1 << 1) };
 /// N - instruction type
 /// G - global variable type
 /// T - data type type
+/// S - second data type type
 /// V - value type
 ///
 template <typename M, typename F, typename N, typename G, typename T,
-          typename V>
+          typename S, typename V>
 class ProjectIRDB {
 public:
   virtual ~ProjectIRDB() = default;
 
   /// Returns the fully linked WPA module that represents the entire program.
-  virtual M getWPAModule() const = 0;
+  virtual M getWPAModule() = 0;
 
   /// Returns the specified module.
-  virtual M getModule(const std::string &ModuleName) const = 0;
+  virtual M getModule(const std::string &ModuleName) = 0;
 
   /// Returns the module that provides the specified function definition or
   /// null.
@@ -72,7 +73,7 @@ public:
   getGlobalVariableDefinition(const std::string &GlobalVariableName) const = 0;
 
   /// Returns the instruction to the corresponding ID.
-  virtual N getInstruction(std::size_t Id) const = 0;
+  virtual N getInstruction(std::size_t Id) = 0;
 
   /// Returns an instruction's ID.
   virtual std::size_t getInstructionID(N I) const = 0;
@@ -88,16 +89,16 @@ public:
 
   /// Returns the struct type's definition if available, its declaration
   /// otherwise.
-  virtual T getStructType(const std::string &TypeName) const = 0;
+  virtual S getStructType(const std::string &TypeName) const = 0;
 
   /// Returns the struct type's definition if available, null otherwise.
-  virtual T getStructTypeDefinition(const std::string &TypeName) const = 0;
+  virtual S getStructTypeDefinition(const std::string &TypeName) const = 0;
 
   /// Returns all allocated types.
   virtual std::set<T> getAllocatedTypes() const = 0;
 
   /// Returns all allocated struct types.
-  virtual std::set<T> getAllocatedStructTypes() const = 0;
+  virtual std::set<S> getAllocatedStructTypes() const = 0;
 
   /// Returns all source files managed by this ProjectIRDB.
   virtual std::set<std::string> getAllSourceFiles() const = 0;
