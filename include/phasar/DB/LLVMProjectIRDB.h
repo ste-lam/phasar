@@ -29,7 +29,6 @@ namespace llvm {
 class Value;
 class Instruction;
 class Type;
-class StructType;
 class Function;
 class GlobalVariable;
 } // namespace llvm

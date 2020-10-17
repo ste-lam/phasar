@@ -453,16 +453,23 @@ void LLVMProjectIRDB::insertModule(llvm::Module *M) {
 
 llvm::Type *
 LLVMProjectIRDB::getStructType(const std::string &TypeName) const {
-  /// Returns the struct type's definition if available, its declaration
-  /// otherwise.
-  // TODO: implement
+  for (auto &[File, Module] : Modules) {
+    auto *T = Module->getTypeByName(TypeName);
+    if (T) {
+      return T;
+    }
+  }  
   return nullptr;
 }
 
 llvm::Type *
 LLVMProjectIRDB::getStructTypeDefinition(const std::string &TypeName) const {
-  /// Returns the struct type's definition if available, null otherwise.
-  // TODO: implement
+  for (auto &[File, Module] : Modules) {
+    auto *T = Module->getTypeByName(TypeName);
+    if (T) {
+      return T;
+    }
+  }  
   return nullptr;
 }
 
