@@ -400,8 +400,8 @@ LLVMProjectIRDB::persistedStringToValue(const std::string &S) const {
     return getGlobalVariableDefinition(S);
   } else if (S.find(".f") != std::string::npos) {
     unsigned Argno = stoi(S.substr(S.find(".f") + 2, S.size()));
-    return const_cast<llvm::Argument *>(getNthFunctionArgument(
-        getFunctionDefinition(S.substr(0, S.find(".f"))), Argno));
+    llvm::Function *F = getFunctionDefinition(S.substr(0, S.find(".f")));
+    return F->getArg(Argno);
   } else if (S.find(".o.") != std::string::npos) {
     unsigned I = S.find('.');
     unsigned J = S.find(".o.");
