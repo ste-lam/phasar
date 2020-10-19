@@ -466,7 +466,7 @@ llvm::Type *
 LLVMProjectIRDB::getStructTypeDefinition(const std::string &TypeName) const {
   for (auto &[File, Module] : Modules) {
     auto *T = Module->getTypeByName(TypeName);
-    if (T) {
+    if (T && !T->isOpaque()) {
       return T;
     }
   }  
