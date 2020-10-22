@@ -451,14 +451,13 @@ void LLVMProjectIRDB::insertModule(llvm::Module *M) {
   preprocessModule(M);
 }
 
-llvm::Type *
-LLVMProjectIRDB::getStructType(const std::string &TypeName) const {
+llvm::Type *LLVMProjectIRDB::getStructType(const std::string &TypeName) const {
   for (auto &[File, Module] : Modules) {
     auto *T = Module->getTypeByName(TypeName);
     if (T) {
       return T;
     }
-  }  
+  }
   return nullptr;
 }
 
@@ -469,7 +468,7 @@ LLVMProjectIRDB::getStructTypeDefinition(const std::string &TypeName) const {
     if (T && !T->isOpaque()) {
       return T;
     }
-  }  
+  }
   return nullptr;
 }
 

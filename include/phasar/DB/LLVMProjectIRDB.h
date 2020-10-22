@@ -41,8 +41,7 @@ namespace psr {
 /// stuff that is stored in it.
 class LLVMProjectIRDB
     : public ProjectIRDB<llvm::Module *, llvm::Function *, llvm::Instruction *,
-                         llvm::GlobalVariable *, llvm::Type *,
-                         llvm::Value *> {
+                         llvm::GlobalVariable *, llvm::Type *, llvm::Value *> {
 private:
   llvm::Module *WPAModule = nullptr;
   IRDBOptions Options;
@@ -150,8 +149,7 @@ public:
     return AllocatedTypes;
   };
 
-  [[nodiscard]] std::set<llvm::Type *>
-  getAllocatedStructTypes() const override;
+  [[nodiscard]] std::set<llvm::Type *> getAllocatedStructTypes() const override;
 
   [[nodiscard]] std::set<llvm::Instruction *>
   getRetOrResInstructions() const override {
