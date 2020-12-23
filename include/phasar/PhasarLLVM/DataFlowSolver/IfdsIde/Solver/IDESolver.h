@@ -200,7 +200,7 @@ public:
   ///
   /// Returns the L-type result for the given value at the given statement.
   ///
-  [[nodiscard]] virtual l_t resultAt(n_t stmt, d_t value) {
+  [[nodiscard]] virtual l_t resultAt(n_t stmt, d_t value) const {
     return valtab.get(stmt, value);
   }
 
@@ -223,13 +223,12 @@ public:
   ///
   template <typename NTy = n_t>
   [[nodiscard]]
-  typename std::enable_if_t<std::is_same_v<NTy, const llvm::Instruction *>, l_t>
-  resultAtInLLVMSSA(NTy stmt, d_t value) {
+  typename std::enable_if_t<std::is_same_v<std::remove_const_t<NTy>, llvm::Instruction *>, l_t>
+  resultAtInLLVMSSA(NTy stmt, d_t value) const {
     if (stmt->getType()->isVoidTy()) {
       return valtab.get(stmt, value);
-    } else {
-      return valtab.get(stmt->getNextNode(), value);
     }
+    return valtab.get(stmt->getNextNode(), value);
   }
 
   ///
@@ -238,7 +237,7 @@ public:
   /// TOP values are never returned.
   ///
   [[nodiscard]] virtual std::unordered_map<d_t, l_t>
-  resultsAt(n_t stmt, bool stripZero = false) /*TODO const*/ {
+  resultsAt(n_t stmt, bool stripZero = false) const {
     std::unordered_map<d_t, l_t> result = valtab.row(stmt);
     if (stripZero) {
       for (auto it = result.begin(); it != result.end();) {
@@ -271,10 +270,10 @@ public:
   ///
   template <typename NTy = n_t>
   [[nodiscard]]
-  typename std::enable_if_t<std::is_same_v<NTy, const llvm::Instruction *>,
+  typename std::enable_if_t<std::is_same_v<std::remove_reference_t<NTy>, llvm::Instruction *>,
                             std::unordered_map<d_t, l_t>>
-  resultsAtInLLVMSSA(NTy stmt, bool stripZero = false) {
-    std::unordered_map<d_t, l_t> result = [&valtabe, stmt]() {
+  resultsAtInLLVMSSA(NTy stmt, bool stripZero = false) const {
+    std::unordered_map<d_t, l_t> result = [this, stmt]() {
       if (stmt->getType()->isVoidTy()) {
         return valtab.row(stmt);
       } else {

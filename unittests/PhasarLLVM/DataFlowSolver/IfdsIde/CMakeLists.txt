@@ -14,7 +14,7 @@ set(ThreadedIfdsIdeSources
 
 if(UNIX)
   # Append -fno-omit-frame-pointer to get better stack traces.
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer -fsanitize=thread")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer")# -fsanitize=thread")
 endif()
 
 foreach(TEST_SRC ${ThreadedIfdsIdeSources})

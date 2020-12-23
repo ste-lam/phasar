@@ -181,6 +181,12 @@ public:
     return table[rowKey][columnKey];
   }
 
+  [[nodiscard]] const V &get(R rowKey, C columnKey) const {
+    // Returns the value corresponding to the given row and column keys, or null
+    // if no such mapping exists.
+    return table.at(rowKey).at(columnKey);
+  }
+
   V remove(R rowKey, C columnKey) {
     // Removes the mapping, if any, associated with the given keys.
     V v = table[rowKey][columnKey];
@@ -193,6 +199,11 @@ public:
   [[nodiscard]] std::unordered_map<C, V> &row(R rowKey) {
     // Returns a view of all mappings that have the given row key.
     return table[rowKey];
+  }
+
+  [[nodiscard]] const std::unordered_map<C, V> &row(R rowKey) const {
+    // Returns a view of all mappings that have the given row key.
+    return table.at(rowKey);
   }
 
   [[nodiscard]] std::multiset<R> rowKeySet() const {
