@@ -30,6 +30,7 @@
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/ErrorHandling.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/EdgeFunctionComposer.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/EdgeFunctions.h"
@@ -254,8 +255,14 @@ public:
 
           container_type computeTargets(d_t src) override {
             container_type Facts;
+            llvm::outs() << "Src = "<< src << "\n";
+            src->dump();
+            llvm::outs() << "-val-";
+            Store->dump();
+            llvm::outs() << "-----\n";
             Facts.insert(src);
             if (IDEInstInteractionAnalysisT::isZeroValueImpl(src)) {
+              llvm::outs() << "ZeroFact\n";
               return Facts;
             }
             // If a value is stored that holds we must generate all potential
@@ -264,6 +271,7 @@ public:
               Facts.insert(Store->getValueOperand());
               Facts.insert(Store->getPointerOperand());
               Facts.insert(PointerPTS->begin(), PointerPTS->end());
+              llvm::outs() << "inserted facts " << Facts.size() << "\n";
             }
             // If the value to be stored does not hold we must at least add the
             // store instruction and the points-to set as the instruction still
@@ -271,7 +279,7 @@ public:
             // if (Store->getPointerOperand() == src ||
             //        PointerPTS->count(src)) {
             //   Facts.insert(Store);
-            //  Facts.erase(src);
+            //   Facts.erase(src);
             // }
             return Facts;
           }
@@ -691,6 +699,9 @@ public:
           return IIAAKillOrReplaceEF::createEdgeFunction(UserEdgeFacts);
         }
       } else {
+        llvm::outs() << "Handling: ";
+        Store->dump();
+        llvm::outs() << "******\n";
         // Use points-to information to find all possible overriding edges.
         std::shared_ptr<std::unordered_set<d_t>> ValuePTS = nullptr;
         if (Store->getValueOperand()->getType()->isPointerTy()) {
@@ -704,6 +715,9 @@ public:
              (ValuePTS && ValuePTS->count(Store->getValueOperand())) ||
              llvm::isa<llvm::ConstantData>(Store->getValueOperand())) &&
             PointerPTS->count(Store->getPointerOperand())) {
+          llvm::outs() << "Kill func:\n";
+          llvm::outs() << "UEF: " << this->LtoString(UserEdgeFacts);
+          llvm::outs() <<"\n____\n";
           return IIAAKillOrReplaceEF::createEdgeFunction(UserEdgeFacts);
         }
         // Kill all labels that are propagated along the edge of the
