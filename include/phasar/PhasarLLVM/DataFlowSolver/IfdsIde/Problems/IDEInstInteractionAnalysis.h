@@ -275,14 +275,8 @@ public:
 
           container_type computeTargets(d_t src) override {
             container_type Facts;
-            llvm::outs() << "Src = "<< src << "\n";
-            src->dump();
-            llvm::outs() << "-val-";
-            Store->dump();
-            llvm::outs() << "-----\n";
             Facts.insert(src);
             if (IDEInstInteractionAnalysisT::isZeroValueImpl(src)) {
-              llvm::outs() << "ZeroFact\n";
               return Facts;
             }
             // If a value is stored that holds we must generate all potential
@@ -291,7 +285,6 @@ public:
               Facts.insert(Store->getValueOperand());
               Facts.insert(Store->getPointerOperand());
               Facts.insert(PointerPTS->begin(), PointerPTS->end());
-              llvm::outs() << "inserted facts " << Facts.size() << "\n";
             }
             return Facts;
           }
@@ -650,9 +643,6 @@ public:
           return IIAAKillOrReplaceEF::createEdgeFunction(UserEdgeFacts);
         }
       } else {
-        llvm::outs() << "Handling: ";
-        Store->dump();
-        llvm::outs() << "******\n";
         // Use points-to information to find all possible overriding edges.
         std::shared_ptr<std::unordered_set<d_t>> ValuePTS = nullptr;
         if (Store->getValueOperand()->getType()->isPointerTy()) {
@@ -680,7 +670,6 @@ public:
             currNode == succNode &&
             (PointerPTS->count(currNode) ||
              Store->getPointerOperand() == currNode)) {
-          std::cout << "LITERAL OVERRIDE\n";
           return IIAAKillOrReplaceEF::createEdgeFunction(BitVectorSet<e_t>());
         }
         // Overriding edge: obtain labels from value to be stored (and may add
@@ -1113,8 +1102,14 @@ protected:
     } else {
       auto lset = std::get<BitVectorSet<e_t>>(l);
       os << "(set size: " << lset.size() << ") values: ";
-      for (const auto &s : lset) {
-        os << s << ", ";
+      if constexpr (std::is_same_v<std::string, e_t>) {
+        for (const auto &s : lset) {
+          os << s << ", ";
+        }
+      } else {
+        for (const auto elem : lset) {
+          os << elem->getRepr() << ", ";
+        }
       }
     }
   }
