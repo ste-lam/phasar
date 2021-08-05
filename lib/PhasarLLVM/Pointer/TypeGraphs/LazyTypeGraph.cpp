@@ -23,6 +23,7 @@
 
 #include "phasar/PhasarLLVM/Pointer/TypeGraphs/LazyTypeGraph.h"
 
+#include "phasar/Utils/LLVMShorthands.h"
 #include "phasar/Utils/Logger.h"
 #include "phasar/Utils/Utilities.h"
 
@@ -45,7 +46,7 @@ struct LazyTypeGraph::dfs_visitor : public boost::default_dfs_visitor {
 
 LazyTypeGraph::vertex_t
 LazyTypeGraph::addType(const llvm::StructType *NewType) {
-  auto Name = NewType->getName().str();
+  auto Name = llvmTypeToString(NewType);
 
   if (type_vertex_map.find(Name) == type_vertex_map.end()) {
     auto Vertex = boost::add_vertex(g);

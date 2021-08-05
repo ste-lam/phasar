@@ -66,7 +66,7 @@ LLVMTypeHierarchy::VertexProperties::VertexProperties(
     : Type(Type), ReachableTypes({Type}) {}
 
 std::string LLVMTypeHierarchy::VertexProperties::getTypeName() const {
-  return Type->getStructName().str();
+  return llvmTypeToString(Type);
 }
 
 LLVMTypeHierarchy::LLVMTypeHierarchy(ProjectIRDB &IRDB) {
@@ -83,7 +83,7 @@ LLVMTypeHierarchy::LLVMTypeHierarchy(const llvm::Module &M) {
 
 std::string
 LLVMTypeHierarchy::removeStructOrClassPrefix(const llvm::StructType &T) {
-  return removeStructOrClassPrefix(T.getName().str());
+  return removeStructOrClassPrefix(llvmTypeToString(&T));
 }
 
 std::string
@@ -131,7 +131,7 @@ bool LLVMTypeHierarchy::isVTable(const std::string &VarName) {
 }
 
 bool LLVMTypeHierarchy::isStruct(const llvm::StructType &T) {
-  return isStruct(T.getName());
+  return T.hasName() && isStruct(T.getName());
 }
 
 bool LLVMTypeHierarchy::isStruct(llvm::StringRef TypeName) {
@@ -309,7 +309,7 @@ std::set<const llvm::StructType *> LLVMTypeHierarchy::getAllTypes() const {
 }
 
 std::string LLVMTypeHierarchy::getTypeName(const llvm::StructType *Type) const {
-  return Type->getStructName().str();
+  return llvmTypeToString(Type);
 }
 
 bool LLVMTypeHierarchy::hasVFTable(const llvm::StructType *Type) const {

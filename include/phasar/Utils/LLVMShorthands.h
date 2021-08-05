@@ -63,6 +63,8 @@ std::string llvmIRToString(const llvm::Value *V);
  */
 std::string llvmIRToShortString(const llvm::Value *V);
 
+std::string llvmTypeToString(const llvm::Type *Ty);
+
 /**
  * @brief Returns all LLVM Global Values that are used in the given LLVM
  * Function.

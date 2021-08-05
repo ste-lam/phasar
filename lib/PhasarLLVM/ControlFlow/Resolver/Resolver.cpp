@@ -65,7 +65,7 @@ const llvm::StructType *getReceiverType(const llvm::CallBase *CallSite) {
 std::string getReceiverTypeName(const llvm::CallBase *CallSite) {
   const auto *const RT = getReceiverType(CallSite);
   if (RT) {
-    return RT->getName().str();
+    return llvmTypeToString(RT);
   }
   return "";
 }

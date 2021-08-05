@@ -31,6 +31,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/ModuleSlotTracker.h"
 #include "llvm/IR/Value.h"
+#include "llvm/Support/Casting.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include "phasar/Config/Configuration.h"
@@ -177,6 +178,25 @@ std::string llvmIRToShortString(const llvm::Value *V) {
   RSO.flush();
   boost::trim_left(IRBuffer);
   return IRBuffer;
+}
+
+std::string llvmTypeToString(const llvm::Type *Ty) {
+  assert(Ty && "Cannot get the string-representation of a nullptr-type");
+
+  if (const auto *STy = llvm::dyn_cast<llvm::StructType>(Ty);
+      STy && STy->hasName()) {
+    return STy->getName().str();
+  }
+
+  std::string ret;
+  llvm::raw_string_ostream OS(ret);
+
+  Ty->print(OS);
+  OS.flush();
+
+  boost::trim_left(ret);
+
+  return ret;
 }
 
 std::vector<const llvm::Value *>

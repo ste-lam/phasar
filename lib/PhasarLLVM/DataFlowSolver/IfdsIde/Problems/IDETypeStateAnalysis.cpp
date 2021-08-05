@@ -697,16 +697,7 @@ IDETypeStateAnalysis::getLocalAliasesAndAllocas(IDETypeStateAnalysis::d_t V,
   return PointsToAndAllocas;
 }
 bool hasMatchingTypeName(const llvm::Type *Ty, const std::string &Pattern) {
-  if (const auto *StructTy = llvm::dyn_cast<llvm::StructType>(Ty)) {
-    return StructTy->getName().contains(Pattern);
-  } else {
-    // primitive type
-    std::string Str;
-    llvm::raw_string_ostream S(Str);
-    S << *Ty;
-    S.flush();
-    return Str.find(Pattern) != std::string::npos;
-  }
+  return llvmTypeToString(Ty).find(Pattern) != std::string::npos;
 }
 bool IDETypeStateAnalysis::hasMatchingType(IDETypeStateAnalysis::d_t V) {
   // General case
