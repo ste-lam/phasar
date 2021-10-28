@@ -180,7 +180,8 @@ IDESolverTest::IDESolverTestAllTop::joinWith(
 }
 
 bool IDESolverTest::IDESolverTestAllTop::equalTo(
-    shared_ptr<EdgeFunction<IDESolverTest::l_t>> /*Other*/) const {
+    shared_ptr<EdgeFunction<IDESolverTest::l_t>> Other) const {
+  (void) Other;
   cout << "IDESolverTest::IDESolverTestAllTop::equalTo()\n";
   return false;
 }
@@ -197,7 +198,7 @@ void IDESolverTest::printFunction(ostream &OS, IDESolverTest::f_t M) const {
   OS << M->getName().str();
 }
 
-void IDESolverTest::printEdgeFact(ostream &OS, IDESolverTest::l_t EdgeFact) const {
+void IDESolverTest::printEdgeFact(ostream &OS, IDESolverTest::l_t /*L*/) const {
   OS << "empty V test";
 }
 

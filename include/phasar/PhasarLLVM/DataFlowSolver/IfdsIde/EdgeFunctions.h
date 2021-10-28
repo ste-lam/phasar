@@ -119,9 +119,12 @@ public:
 
   ~AllTop() override = default;
 
-  L computeTarget(L source) override { return TopElement; }
+  L computeTarget(L Source) override {
+    (void) Source;
+    return TopElement; }
 
-  EdgeFunctionPtrType composeWith(EdgeFunctionPtrType secondFunction) override {
+  EdgeFunctionPtrType composeWith(EdgeFunctionPtrType SecondFunction) override {
+    (void) SecondFunction;
     return this->shared_from_this();
   }
 
@@ -136,7 +139,7 @@ public:
     return false;
   }
 
-  void print(std::ostream &OS, bool isForDebug = false) const override {
+  void print(std::ostream &OS, [[maybe_unused]] bool IsForDebug = false) const override {
     OS << "AllTop";
   }
 };
@@ -157,7 +160,9 @@ public:
 
   ~AllBottom() override = default;
 
-  L computeTarget(L source) override { return BottomElement; }
+  L computeTarget(L Source) override {
+    (void) Source;
+    return BottomElement; }
 
   EdgeFunctionPtrType composeWith(EdgeFunctionPtrType SecondFunction) override {
     if (auto *Ab = dynamic_cast<AllBottom<L> *>(SecondFunction.get())) {
@@ -171,7 +176,7 @@ public:
 
   EdgeFunctionPtrType joinWith(EdgeFunctionPtrType OtherFunction) override {
     if (OtherFunction.get() == this ||
-        OtherFunction->equal_to(this->shared_from_this())) {
+        OtherFunction->equalTo(this->shared_from_this())) {
       return this->shared_from_this();
     }
     if (auto *Alltop = dynamic_cast<AllTop<L> *>(OtherFunction.get())) {
@@ -185,12 +190,12 @@ public:
 
   bool equalTo(EdgeFunctionPtrType Other) const override {
     if (auto *Allbottom = dynamic_cast<AllBottom<L> *>(Other.get())) {
-      return (Allbottom->bottomElement == BottomElement);
+      return (Allbottom->BottomElement == BottomElement);
     }
     return false;
   }
 
-  void print(std::ostream &OS, bool isForDebug = false) const override {
+  void print(std::ostream &OS, [[maybe_unused]] bool IsForDebug = false) const override {
     OS << "AllBottom";
   }
 };
@@ -242,7 +247,7 @@ public:
     return Instance;
   }
 
-  void print(std::ostream &OS, bool isForDebug = false) const override {
+  void print(std::ostream &OS, [[maybe_unused]] bool IsForDebug = false) const override {
     OS << "EdgeIdentity";
   }
 };
