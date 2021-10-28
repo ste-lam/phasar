@@ -227,7 +227,7 @@ IDESecureHeapPropagation::IdentityEdgeFunction::computeTarget(l_t Source) {
   return Source;
 }
 
-bool IDESecureHeapPropagation::IdentityEdgeFunction::equal_to(
+bool IDESecureHeapPropagation::IdentityEdgeFunction::eqaulTo(
     std::shared_ptr<EdgeFunction<l_t>> Other) const {
   return Other.get() == this; // singelton
 }
@@ -273,7 +273,7 @@ IDESecureHeapPropagation::SHPGenEdgeFn::composeWith(
     std::shared_ptr<EdgeFunction<l_t>> SecondFunction) {
   return SHPGenEdgeFn::getInstance(SecondFunction->computeTarget(value));
 }
-bool IDESecureHeapPropagation::SHPGenEdgeFn::equal_to(
+bool IDESecureHeapPropagation::SHPGenEdgeFn::eqaulTo(
     std::shared_ptr<EdgeFunction<l_t>> Other) const {
   return Other.get() == this; // reference-equality
 }

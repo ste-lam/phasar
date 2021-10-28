@@ -128,7 +128,7 @@ public:
         Vec.insert(Func);
       }
     }
-    if (Vec.size == 1) {
+    if (!Vec.empty()) {
       return Vec[0];
     }
     if (Vec.empty()) {
@@ -284,7 +284,9 @@ public:
   virtual ~KillAll() = default;
   KillAll(const KillAll &K) = delete;
   KillAll &operator=(const KillAll &K) = delete;
-  container_type computeTargets() override { return container_type(); }
+  container_type computeTargets([[maybe_unused]] D Source) override {
+    return container_type();
+  }
   static std::shared_ptr<KillAll<D>> getInstance() {
     static std::shared_ptr<KillAll> Instance =
         std::shared_ptr<KillAll>(new KillAll);
@@ -378,7 +380,6 @@ public:
                 {Identity<D, Container>::getInstance()});
           }
           return FlowFuncs;
-         
         }()) {}
   virtual ~Union() = default;
   container_type computeTargets(D Source) override {

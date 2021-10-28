@@ -140,7 +140,7 @@ public:
 
     l_t computeTarget(l_t source) override;
 
-    bool equal_to(std::shared_ptr<EdgeFunction<l_t>> other) const override;
+    bool eqaulTo(std::shared_ptr<EdgeFunction<l_t>> other) const override;
     std::shared_ptr<EdgeFunction<l_t>>
     composeWith(std::shared_ptr<EdgeFunction<l_t>> secondFunction) override;
     void print(std::ostream &OS, bool isForDebug = false) const override;
@@ -156,7 +156,7 @@ public:
     l_t computeTarget(l_t source) override;
     std::shared_ptr<EdgeFunction<l_t>>
     composeWith(std::shared_ptr<EdgeFunction<l_t>> secondFunction) override;
-    bool equal_to(std::shared_ptr<EdgeFunction<l_t>> other) const override;
+    bool eqaulTo(std::shared_ptr<EdgeFunction<l_t>> other) const override;
 
     void print(std::ostream &OS, bool isForDebug = false) const override;
 

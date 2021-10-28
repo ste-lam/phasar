@@ -47,7 +47,7 @@ LCAEdgeFunctionComposer::composeWith(
     return SecondFunction;
   }
   auto GPrime = G->composeWith(SecondFunction);
-  if (GPrime->equal_to(G)) {
+  if (GPrime->equalTo(G)) {
     return shared_from_this();
   }
   return F->composeWith(GPrime);
@@ -58,7 +58,7 @@ LCAEdgeFunctionComposer::joinWith(
     std::shared_ptr<EdgeFunction<IDEGeneralizedLCA::l_t>> OtherFunction) {
   // see <phasar/PhasarLVM/IfdsIde/IDELinearConstantAnalysis.h>
   if (OtherFunction.get() == this ||
-      OtherFunction->equal_to(this->shared_from_this())) {
+      OtherFunction->equalTo(this->shared_from_this())) {
     return this->shared_from_this();
   }
   if (auto *AT =

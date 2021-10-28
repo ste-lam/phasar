@@ -261,15 +261,15 @@ IDEGeneralizedLCA::getNormalEdgeFunction(IDEGeneralizedLCA::n_t Curr,
   LOG_IF_ENABLE(BOOST_LOG_SEV(lg::get(), DEBUG)
                 << "IDEGeneralizedLCA::getNormalEdgeFunction()");
   LOG_IF_ENABLE(BOOST_LOG_SEV(lg::get(), DEBUG)
-                << "(N) Curr Inst : " << IDEGeneralizedLCA::NtoString(Curr));
+                << "(N) Curr Inst : " << IDEGeneralizedLCA::ntoString(Curr));
   LOG_IF_ENABLE(BOOST_LOG_SEV(lg::get(), DEBUG)
                 << "(D) Curr Node :   "
-                << IDEGeneralizedLCA::DtoString(CurrNode));
+                << IDEGeneralizedLCA::dtoString(CurrNode));
   LOG_IF_ENABLE(BOOST_LOG_SEV(lg::get(), DEBUG)
-                << "(N) Succ Inst : " << IDEGeneralizedLCA::NtoString(Succ));
+                << "(N) Succ Inst : " << IDEGeneralizedLCA::ntoString(Succ));
   LOG_IF_ENABLE(BOOST_LOG_SEV(lg::get(), DEBUG)
                 << "(D) Succ Node :   "
-                << IDEGeneralizedLCA::DtoString(SuccNode));
+                << IDEGeneralizedLCA::dtoString(SuccNode));
   // Initialize global variables at entry point
   if (!isZeroValue(CurrNode) && ICF->isStartPoint(Curr) &&
       isEntryPoint(ICF->getFunctionOf(Curr)->getName().str()) &&
@@ -535,8 +535,8 @@ void IDEGeneralizedLCA::printEdgeFact(std::ostream &Os,
       } else {
         for (auto res : results) {
           if (!llvm::isa<llvm::LoadInst>(res.first)) {
-            os << "\nValue: " << VtoString(res.second)
-               << "\nIR  : " << DtoString(res.first) << '\n'
+            os << "\nValue: " << vtoString(res.second)
+               << "\nIR  : " << dtoString(res.first) << '\n'
                << llvmValueToSrc(res.first, false) << "\n";
           }
         }
@@ -565,11 +565,11 @@ void IDEGeneralizedLCA::emitTextReport(
         auto Results = SR.resultsAt(Stmt, true);
         stripBottomResults(Results);
         if (!Results.empty()) {
-          Os << "At IR statement: " << NtoString(Stmt) << '\n';
+          Os << "At IR statement: " << ntoString(Stmt) << '\n';
           for (const auto &Res : Results) {
             if (Res.second != bottomElement()) {
-              Os << "   Fact: " << DtoString(Res.first)
-                 << "\n  Value: " << VtoString(Res.second) << '\n';
+              Os << "   Fact: " << dtoString(Res.first)
+                 << "\n  Value: " << vtoString(Res.second) << '\n';
             }
           }
           Os << '\n';
@@ -615,7 +615,7 @@ IDEGeneralizedLCA::lca_results_t IDEGeneralizedLCA::getLCAResults(
     std::set<std::string> AllocatedVars;
     for (const auto *Stmt : ICF->getAllInstructionsOf(F)) {
       unsigned Lnr = getLineFromIR(Stmt);
-      std::cout << "\nIR : " << NtoString(Stmt) << "\nLNR: " << Lnr << '\n';
+      std::cout << "\nIR : " << ntoString(Stmt) << "\nLNR: " << Lnr << '\n';
       // We skip statements with no source code mapping
       if (Lnr == 0) {
         std::cout << "Skipping this stmt!\n";
@@ -646,15 +646,15 @@ IDEGeneralizedLCA::lca_results_t IDEGeneralizedLCA::getLCAResults(
         } else {
           // It's not a terminator inst, hence it has only a single successor
           const auto *Succ = ICF->getSuccsOf(Stmt)[0];
-          std::cout << "Succ stmt: " << NtoString(Succ) << '\n';
+          std::cout << "Succ stmt: " << ntoString(Succ) << '\n';
           Results = SR.resultsAt(Succ, true);
         }
         // stripBottomResults(results);
         std::set<std::string> ValidVarsAtStmt;
         for (const auto &Res : Results) {
           auto VarName = getVarNameFromIR(Res.first);
-          std::cout << "  D: " << DtoString(Res.first)
-                    << " | V: " << VtoString(Res.second)
+          std::cout << "  D: " << dtoString(Res.first)
+                    << " | V: " << vtoString(Res.second)
                     << " | Var: " << VarName << '\n';
           if (!VarName.empty()) {
             // Only store/overwrite values of variables from allocas or
@@ -717,7 +717,7 @@ bool IDEGeneralizedLCA::isEntryPoint(const std::string &Name) const {
   return Name == "main";
 }
 
-template <typename V> std::string IDEGeneralizedLCA::VtoString(V Val) {
+template <typename V> std::string IDEGeneralizedLCA::vtoString(V Val) {
   std::stringstream Ss;
   Ss << Val;
   return Ss.str();
