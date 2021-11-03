@@ -215,7 +215,7 @@ if (PHASAR_ENABLE_CLANG_TIDY_DURING_BUILD)
   set(CMAKE_CXX_CLANG_TIDY
     clang-tidy;
     -header-filter=phasar.*;
-    -warnings-as-errors=*;
+    # -warnings-as-errors=*;
   )
 endif ()
 
