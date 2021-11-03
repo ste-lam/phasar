@@ -204,7 +204,8 @@ public:
     return S;
   }
 
-  [[nodiscard]] std::unordered_map<RTy, std::unordered_map<CTy, VTy>> rowMap() const {
+  [[nodiscard]] std::unordered_map<RTy, std::unordered_map<CTy, VTy>>
+  rowMap() const {
     // Returns a view that associates each row key with the corresponding map
     // from column keys to values.
     return Data;
@@ -221,15 +222,18 @@ public:
     return S;
   }
 
-  friend bool operator==(const Table<RTy, CTy, VTy> &Lhs, const Table<RTy, CTy, VTy> &Rhs) {
+  friend bool operator==(const Table<RTy, CTy, VTy> &Lhs,
+                         const Table<RTy, CTy, VTy> &Rhs) {
     return Lhs.Data == Rhs.Data;
   }
 
-  friend bool operator<(const Table<RTy, CTy, VTy> &Lhs, const Table<RTy, CTy, VTy> &Rhs) {
+  friend bool operator<(const Table<RTy, CTy, VTy> &Lhs,
+                        const Table<RTy, CTy, VTy> &Rhs) {
     return Lhs.Data < Rhs.Data;
   }
 
-  friend std::ostream &operator<<(std::ostream &Os, const Table<RTy, CTy, VTy> &T) {
+  friend std::ostream &operator<<(std::ostream &Os,
+                                  const Table<RTy, CTy, VTy> &T) {
     for (const auto &M1 : T.Data) {
       for (const auto &M2 : M1.second) {
         Os << "< " << M1.first << " , " << M2.first << " , " << M2.second

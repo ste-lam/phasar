@@ -96,12 +96,13 @@ bool JoinEdgeFunction::equalTo(
   if (auto *OtherJoin = dynamic_cast<JoinEdgeFunction *>(Other.get())) {
     return (First->equalTo(OtherJoin->First) &&
             Second->equalTo(OtherJoin->Second)) // join is commutative...
-           ||
-           (First->equalTo(OtherJoin->Second) && Second->equalTo(OtherJoin->First));
+           || (First->equalTo(OtherJoin->Second) &&
+               Second->equalTo(OtherJoin->First));
   }
   return false;
 }
-void JoinEdgeFunction::print(std::ostream &OS, [[maybe_unused]] bool IsForDebug) const {
+void JoinEdgeFunction::print(std::ostream &OS,
+                             [[maybe_unused]] bool IsForDebug) const {
   OS << "JoinEdgeFn[";
   First->print(OS);
   OS << ", ";

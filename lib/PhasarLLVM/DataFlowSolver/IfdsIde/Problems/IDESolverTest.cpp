@@ -183,7 +183,7 @@ IDESolverTest::IDESolverTestAllTop::joinWith(
 
 bool IDESolverTest::IDESolverTestAllTop::equalTo(
     shared_ptr<EdgeFunction<IDESolverTest::l_t>> Other) const {
-  (void) Other;
+  (void)Other;
   cout << "IDESolverTest::IDESolverTestAllTop::equalTo()\n";
   return false;
 }
