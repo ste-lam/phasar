@@ -124,6 +124,9 @@ public:
     this->ZeroValue =
         IDEInstInteractionAnalysisT<EdgeFactType, SyntacticAnalysisOnly,
                                     EnableIndirectTaints>::createZeroValue();
+    this->Seeds =
+        IDEInstInteractionAnalysisT<EdgeFactType, SyntacticAnalysisOnly,
+                                    EnableIndirectTaints>::initialSeeds();
     IIAAAddLabelsEF::initEdgeFunctionCleaner();
     IIAAKillOrReplaceEF::initEdgeFunctionCleaner();
   }
@@ -156,10 +159,12 @@ public:
     //                    v  v  v
     //                    0  x  G
     //
-    static auto Seeds = this->initialSeeds();
-    static bool initGlobals = true;
-    if (initGlobals && Seeds.count(curr)) {
-      initGlobals = false;
+    // Global variables may only be initialized once.
+    // They may also be initialized within getCallToRetFlowFunction() in case an
+    // entry point is a function call. (See getCallToRetFlowFunction().)
+    if (Seeds.countInitialSeeds(curr) && !InitializedGlobalsAtSeed[curr]) {
+      InitializedGlobalsAtSeed[curr] =
+          true; // We are initializing globals here now.
       std::set<d_t> Globals;
       for (const auto *Mod : this->IRDB->getAllModules()) {
         for (const auto &Global : Mod->globals()) {
@@ -255,7 +260,7 @@ public:
         //
         struct IIAFlowFunction : FlowFunction<d_t, container_type> {
           const llvm::LoadInst *Load;
-          std::shared_ptr<std::unordered_set<d_t>> PTS;
+          LLVMPointsToInfo::AllocationSiteSetPtrTy PTS;
 
           IIAFlowFunction(IDEInstInteractionAnalysisT &Problem,
                           const llvm::LoadInst *Load)
@@ -266,11 +271,11 @@ public:
           container_type computeTargets(d_t src) override {
             container_type Facts;
             Facts.insert(src);
-            if (PTS->count(src)) {
-              Facts.insert(Load);
-            }
+
             // Handle global variables which behave a bit special.
-            if (PTS->empty() && src == Load->getPointerOperand()) {
+            if (src == Load->getPointerOperand()) {
+              Facts.insert(Load);
+            } else if (PTS->count(src)) {
               Facts.insert(Load);
             }
             return Facts;
@@ -300,8 +305,8 @@ public:
         //
         struct IIAFlowFunction : FlowFunction<d_t, container_type> {
           const llvm::StoreInst *Store;
-          std::shared_ptr<std::unordered_set<d_t>> ValuePTS;
-          std::shared_ptr<std::unordered_set<d_t>> PointerPTS;
+          LLVMPointsToInfo::AllocationSiteSetPtrTy ValuePTS;
+          LLVMPointsToInfo::AllocationSiteSetPtrTy PointerPTS;
 
           IIAFlowFunction(IDEInstInteractionAnalysisT &Problem,
                           const llvm::StoreInst *Store)
@@ -311,8 +316,9 @@ public:
                         Store->getValueOperand(),
                         Problem.OnlyConsiderLocalAliases);
                   } else {
-                    return std::make_shared<std::unordered_set<d_t>>(
-                        std::unordered_set<d_t>{Store->getValueOperand()});
+                    return std::make_unique<LLVMPointsToInfo::PointsToSetTy>(
+                        LLVMPointsToInfo::PointsToSetTy{
+                            Store->getValueOperand()});
                   }
                 }()),
                 PointerPTS(Problem.PT->getReachableAllocationSites(
@@ -486,7 +492,8 @@ public:
     if (this->ICF->isHeapAllocatingFunction(destMthd)) {
       // Kill add facts and model the effects in getCallToRetFlowFunction().
       return KillAll<d_t>::getInstance();
-    } else if (destMthd->isDeclaration()) {
+    }
+    if (destMthd->isDeclaration()) {
       // We don't have anything that we could analyze, kill all facts.
       return KillAll<d_t>::getInstance();
     }
@@ -552,6 +559,45 @@ public:
   inline FlowFunctionPtrType
   getCallToRetFlowFunction(n_t callSite, n_t retSite,
                            std::set<f_t> callees) override {
+    // The entry point of a function may also be a call statement, which is why
+    // we need to replicate the global generating code that we already saw in
+    // getNormalFlowFunction(). Generate all global variables and handle the
+    // instruction that we currently misuse to generate them.
+    // TODO The handling of global variables, global constructors and global
+    // destructors will soon be possible using a dedicated mechanism.
+    //
+    // Flow function:
+    //
+    // Let G be the set of global variables.
+    //
+    //                    0
+    //                    |\
+    // some instruction   | \--\
+    //                    v  v  v
+    //                    0  x  G
+    //
+    // Global variables may only be initialized once.
+    // They may also be initialized within getCallToRetFlowFunction() in case an
+    // entry point is a function call. (See getCallToRetFlowFunction().)
+    if (Seeds.countInitialSeeds(callSite) &&
+        !InitializedGlobalsAtSeed[callSite]) {
+      InitializedGlobalsAtSeed[callSite] =
+          true; // We are initializing globals here now.
+      std::set<d_t> Globals;
+      for (const auto *Mod : this->IRDB->getAllModules()) {
+        for (const auto &Global : Mod->globals()) {
+          Globals.insert(&Global); // collect all global variables
+        }
+      }
+      // Create the flow function that generates the globals.
+      auto GlobalFlowFun =
+          std::make_shared<GenAll<d_t>>(Globals, this->getZeroValue());
+      // Create the flow function for the instruction we are currently misusing.
+      auto FlowFun = getCallToRetFlowFunction(callSite, retSite, callees);
+      return std::make_shared<Union<d_t>>(
+          std::vector<FlowFunctionPtrType>({FlowFun, GlobalFlowFun}));
+    }
+
     // Model call to heap allocating functions (new, new[], malloc, etc.) --
     // only model direct calls, though.
     if (callees.size() == 1) {
@@ -588,17 +634,19 @@ public:
       }
     }
     // Declarations only case
-    return std::make_shared<MapFactsAlongsideCallSite<container_type>>(
-        llvm::cast<llvm::CallBase>(callSite),
-        true /* propagate globals alongsite the call site */,
-        [](const llvm::CallBase *CS, const llvm::Value *V) {
-          return false; // not involved in the call
-        });
+    if (OnlyDecls) {
+      return std::make_shared<MapFactsAlongsideCallSite<container_type>>(
+          llvm::cast<llvm::CallBase>(callSite),
+          true /* propagate globals alongsite the call site */,
+          [](const llvm::CallBase *CS, const llvm::Value *V) {
+            return false; // not involved in the call
+          });
+    }
     // Otherwise
     return std::make_shared<MapFactsAlongsideCallSite<container_type>>(
         llvm::cast<llvm::CallBase>(callSite),
-        false // do not propagate globals (as they are propagated via call- and
-              // ret-functions)
+        false // do not propagate globals (as they are propagated via call-
+              // and ret-functions)
     );
   }
 
@@ -608,16 +656,15 @@ public:
     return nullptr;
   }
 
-  inline std::map<n_t, container_type> initialSeeds() override {
-    std::map<n_t, container_type> SeedMap;
+  inline InitialSeeds<n_t, d_t, l_t> initialSeeds() override {
+    InitialSeeds<n_t, d_t, l_t> Seeds;
     for (const auto &EntryPoint : this->EntryPoints) {
       for (const auto *StartPoint :
            this->ICF->getStartPointsOf(this->ICF->getFunction(EntryPoint))) {
-        SeedMap.insert(
-            std::make_pair(StartPoint, container_type({this->getZeroValue()})));
+        Seeds.addSeed(StartPoint, this->getZeroValue(), this->bottomElement());
       }
     }
-    return SeedMap;
+    return Seeds;
   }
 
   [[nodiscard]] inline d_t createZeroValue() const override {
@@ -682,13 +729,12 @@ public:
     //
     // Let g be a global variable.
     //
-    //                0
-    //                 \
-    // %a = alloca      \ \x.x \cup { commit of('@global') }
-    //                   v
-    //                   g
+    //                                    0
+    //                                     \
+    // non-call/non-return instruction      \ \x.x \cup { commit of('@global') }
+    //                                       v
+    //                                       g
     //
-    static auto Seeds = this->initialSeeds();
     static auto Globals = [this]() {
       std::set<d_t> Globals;
       for (const auto *Mod : this->IRDB->getAllModules()) {
@@ -698,7 +744,8 @@ public:
       }
       return Globals;
     }();
-    if (Seeds.count(curr) && isZeroValue(currNode) && Globals.count(succNode)) {
+    if (Seeds.containsInitialSeedsFor(curr) && isZeroValue(currNode) &&
+        Globals.count(succNode)) {
       if (const auto *GlobalVarDef =
               llvm::dyn_cast<llvm::GlobalVariable>(succNode)) {
         EdgeFacts = edgeFactGen(GlobalVarDef);
@@ -1063,6 +1110,39 @@ public:
             return IIAAAddLabelsEF::createEdgeFunction(UserEdgeFacts);
           }
         }
+      }
+    }
+    // TODO use new mechanism to handle globals.
+    //
+    // Zero --> Global edges
+    //
+    // Edge function:
+    //
+    // Let g be a global variable.
+    //
+    //                0
+    //                 \
+    // some callsite    \ \x.x \cup { commit of('@global') }
+    //                   v
+    //                   g
+    //
+    static auto Globals = [this]() {
+      std::set<d_t> Globals;
+      for (const auto *Mod : this->IRDB->getAllModules()) {
+        for (const auto &G : Mod->globals()) {
+          Globals.insert(&G);
+        }
+      }
+      return Globals;
+    }();
+    if (Seeds.countInitialSeeds(callSite) && isZeroValue(callNode) &&
+        Globals.count(retSiteNode)) {
+      if (const auto *GlobalVarDef =
+              llvm::dyn_cast<llvm::GlobalVariable>(retSiteNode)) {
+        EdgeFacts = edgeFactGen(GlobalVarDef);
+        // fill BitVectorSet
+        UserEdgeFacts = BitVectorSet<e_t>(EdgeFacts.begin(), EdgeFacts.end());
+        return IIAAAddLabelsEF::createEdgeFunction(UserEdgeFacts);
       }
     }
     // Capture interactions of the call instruction and its operands.
@@ -1460,6 +1540,11 @@ private:
     }
     return {};
   }
+
+  // TODO This is only a temporary mechanism to handle global variables.
+  InitialSeeds<n_t, d_t, l_t> Seeds;
+  std::unordered_map<n_t, bool>
+      InitializedGlobalsAtSeed; // Globals must be initialized!
 
 }; // namespace psr
 

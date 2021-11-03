@@ -48,11 +48,9 @@ list(GET VERSION_NUMBER_FILE 2 VERSION_NUMBER_PHASAR)
 
 include("phasar_macros")
 
-option(PHASAR_ENABLE_CLANG_TIDY_DURING_BUILD "Enable clang-tidy during build (default is OFF)" OFF)
+option(PHASAR_BUILD_UNITTESTS "Build all tests (default is ON)" ON)
 
 option(PHASAR_BUILD_IR "Build IR test code (default is ON)" ON)
-
-option(PHASAR_BUILD_UNITTESTS "Build all tests (default is ON)" ON)
 
 option(PHASAR_BUILD_OPENSSL_TS_UNITTESTS "Build OPENSSL typestate tests (require OpenSSL, default is OFF)" OFF)
 
@@ -106,6 +104,12 @@ include_directories(
 
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+if (LLVM_ENABLE_LIBCXX)
+  set(PHASAR_STD_FILESYSTEM c++fs)
+else()
+  set(PHASAR_STD_FILESYSTEM stdc++fs)
+endif()
 
 ### Adding external libraries
 # Threads

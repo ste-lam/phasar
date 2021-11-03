@@ -57,8 +57,7 @@ public:
 
 private:
   const TypeStateDescription &TSD;
-  std::map<const llvm::Value *, std::unordered_set<const llvm::Value *>>
-      PointsToCache;
+  std::map<const llvm::Value *, LLVMPointsToInfo::PointsToSetTy> PointsToCache;
   std::map<const llvm::Value *, std::set<const llvm::Value *>>
       RelevantAllocaCache;
 
@@ -125,7 +124,7 @@ public:
   FlowFunctionPtrType getSummaryFlowFunction(n_t callSite,
                                              f_t destFun) override;
 
-  std::map<n_t, std::set<d_t>> initialSeeds() override;
+  InitialSeeds<n_t, d_t, l_t> initialSeeds() override;
 
   d_t createZeroValue() const override;
 

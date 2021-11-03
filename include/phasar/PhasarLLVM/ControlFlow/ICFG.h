@@ -23,6 +23,8 @@
 #include <string>
 #include <vector>
 
+#include "llvm/ADT/DenseMap.h"
+
 #include "nlohmann/json.hpp"
 
 #include "phasar/PhasarLLVM/ControlFlow/CFG.h"
@@ -42,6 +44,18 @@ CallGraphAnalysisType toCallGraphAnalysisType(const std::string &S);
 std::ostream &operator<<(std::ostream &Os, const CallGraphAnalysisType &CGA);
 
 template <typename N, typename F> class ICFG : public virtual CFG<N, F> {
+
+protected:
+  std::vector<F> GlobalInitializers;
+
+  virtual void collectGlobalCtors() = 0;
+
+  virtual void collectGlobalDtors() = 0;
+
+  virtual void collectGlobalInitializers() = 0;
+
+  virtual void collectRegisteredDtors() = 0;
+
 public:
   ~ICFG() override = default;
 
@@ -49,23 +63,23 @@ public:
 
   [[nodiscard]] virtual F getFunction(const std::string &Fun) const = 0;
 
-  virtual bool isIndirectFunctionCall(N Stmt) const = 0;
+  virtual bool isIndirectFunctionCall(N Inst) const = 0;
 
-  virtual bool isVirtualFunctionCall(N Stmt) const = 0;
+  virtual bool isVirtualFunctionCall(N Inst) const = 0;
 
   [[nodiscard]] virtual std::set<N> allNonCallStartNodes() const = 0;
 
-  virtual std::set<F> getCalleesOfCallAt(N Stmt) const = 0;
+  virtual std::set<F> getCalleesOfCallAt(N Inst) const = 0;
 
   virtual std::set<N> getCallersOf(F Fun) const = 0;
 
   virtual std::set<N> getCallsFromWithin(F Fun) const = 0;
 
-  virtual std::set<N> getReturnSitesOfCallAt(N Stmt) const = 0;
+  virtual std::set<N> getReturnSitesOfCallAt(N Inst) const = 0;
 
-  [[nodiscard]] virtual std::vector<F> getGlobalCtors() const = 0;
-
-  [[nodiscard]] virtual std::vector<F> getGlobalDtors() const = 0;
+  const std::vector<F> &getGlobalInitializers() const {
+    return GlobalInitializers;
+  }
 
   using CFG<N, F>::print; // tell the compiler we wish to have both prints
   virtual void print(std::ostream &OS = std::cout) const = 0;

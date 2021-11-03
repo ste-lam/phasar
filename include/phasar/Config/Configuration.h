@@ -62,16 +62,16 @@ public:
 
   // Variables to be used in JSON export format
   /// Identifier for call graph export
-  static std::string jsonCallGraphId() { return "CallGraph"; }
+  static std::string jsonCallGraphID() { return "psr.cg"; }
 
   /// Identifier for type hierarchy graph export
-  static std::string jsonTypeHierarchyId() { return "TypeHierarchy"; }
+  static std::string jsonTypeHierarchyID() { return "psr.th"; }
 
   /// Identifier for points-to graph export
-  static std::string jsonPointsToGraphId() { return "PointsToGraph"; }
+  static std::string jsonPointsToGraphID() { return "psr.pt"; }
 
   /// Identifier for data-flow results export
-  static std::string jsonDataFlowId() { return "DataFlowInformation"; }
+  static std::string jsonDataFlowID() { return "psr.df"; }
 
   static PhasarConfig &getPhasarConfig();
 
@@ -130,15 +130,15 @@ private:
   static const std::string PhasarDir;
 
   /// Name of the file storing all glibc function names.
-  static const inline std::string GLIBCFunctionListFileName =
+  static inline const std::string GLIBCFunctionListFileName =
       "glibc_function_list_v1-04.05.17.conf";
 
   /// Name of the file storing all LLVM intrinsic function names.
-  static const inline std::string LLVMIntrinsicFunctionListFileName =
+  static inline const std::string LLVMIntrinsicFunctionListFileName =
       "llvm_intrinsics_function_list_v1-04.05.17.conf";
 
   /// Log file directory
-  static const inline std::string LogFileDirectory = "log/";
+  static inline const std::string LogFileDirectory = "log/";
 };
 
 } // namespace psr

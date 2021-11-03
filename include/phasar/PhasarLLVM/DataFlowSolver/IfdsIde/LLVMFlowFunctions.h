@@ -133,17 +133,28 @@ protected:
   const llvm::Function *DestFun;
   bool PropagateGlobals;
   std::vector<const llvm::Value *> Actuals{};
-  std::vector<const llvm::Value *> Formals{};
-  std::function<bool(const llvm::Value *)> Predicate;
+  std::vector<const llvm::Argument *> Formals{};
+  std::function<bool(const llvm::Value *)> ActualPredicate;
+  std::function<bool(const llvm::Argument *)> FormalPredicate;
+  const llvm::Value *CallInstr;
+  const bool PropagateZeroToCallee;
+  const bool PropagateRetToCallee;
 
 public:
   MapFactsToCallee(
       const llvm::CallBase *CallSite, const llvm::Function *DestFun,
       bool PropagateGlobals = true,
-      std::function<bool(const llvm::Value *)> Predicate =
-          [](const llvm::Value *) { return true; })
+      std::function<bool(const llvm::Value *)> ActualPredicate =
+          [](const llvm::Value *) { return true; },
+      std::function<bool(const llvm::Argument *)> FormalPredicate =
+          [](const llvm::Argument *) { return true; },
+      const bool PropagateZeroToCallee = true,
+      const bool PropagateRetToCallee = false)
       : DestFun(DestFun), PropagateGlobals(PropagateGlobals),
-        Predicate(std::move(Predicate)) {
+        ActualPredicate(std::move(ActualPredicate)),
+        FormalPredicate(std::move(FormalPredicate)), CallInstr(CallSite),
+        PropagateZeroToCallee(PropagateZeroToCallee),
+        PropagateRetToCallee(PropagateRetToCallee) {
     // Set up the actual parameters
     for (const auto &Actual : CallSite->args()) {
       Actuals.push_back(Actual);
@@ -162,22 +173,34 @@ public:
     if (DestFun->isDeclaration()) {
       return {};
     }
-    // Pass ZeroValue as is
+    // Pass ZeroValue as is, if desired
     if (LLVMZeroValue::getInstance()->isLLVMZeroValue(Source)) {
-      return {Source};
+      if (PropagateZeroToCallee) {
+        return {Source};
+      }
+      return {};
     }
+    container_type Res;
     // Pass global variables as is, if desired
+    // Globals could also be actual arguments, then the formal argument needs to
+    // be generated below.
     // Need llvm::Constant here to cover also ConstantExpr and ConstantAggregate
     if (PropagateGlobals && llvm::isa<llvm::Constant>(Source)) {
-      return {Source};
+      Res.insert(Source);
     }
-    // Do the parameter mapping
-    container_type Res;
+    // Handle back propagation of return value in backwards analysis.
+    // We add it to the result here. Later, normal flow in callee can identify
+    // it
+    if (PropagateRetToCallee) {
+      if (Source == CallInstr) {
+        Res.insert(Source);
+      }
+    }
     // Handle C-style varargs functions
     if (DestFun->isVarArg()) {
       // Map actual parameters to corresponding formal parameters.
       for (unsigned Idx = 0; Idx < Actuals.size(); ++Idx) {
-        if (Source == Actuals[Idx] && Predicate(Actuals[Idx])) {
+        if (Source == Actuals[Idx] && ActualPredicate(Actuals[Idx])) {
           if (Idx >= DestFun->arg_size()) {
             // Over-approximate by trying to add the
             //   alloca [1 x %struct.__va_list_tag], align 16
@@ -202,23 +225,24 @@ public:
           } else {
             assert(Idx < Formals.size() &&
                    "Out of bound access to formal parameters!");
-            Res.insert(Formals[Idx]); // corresponding formal
+            if (FormalPredicate(Formals[Idx])) {
+              Res.insert(Formals[Idx]); // corresponding formal
+            }
           }
         }
       }
-      return Res;
-    } else {
-      // Handle ordinary case
-      // Map actual parameters to corresponding formal parameters.
-      for (unsigned Idx = 0; Idx < Actuals.size(); ++Idx) {
-        if (Source == Actuals[Idx] && Predicate(Actuals[Idx])) {
-          assert(Idx < Formals.size() &&
-                 "Out of bound access to formal parameters!");
-          Res.insert(Formals[Idx]); // corresponding formal
-        }
-      }
-      return Res;
     }
+    // Handle ordinary case
+    // Map actual parameters to corresponding formal parameters.
+    for (unsigned Idx = 0; Idx < Actuals.size() && Idx < DestFun->arg_size();
+         ++Idx) {
+      if (Source == Actuals[Idx] && ActualPredicate(Actuals[Idx])) {
+        assert(Idx < Formals.size() &&
+               "Out of bound access to formal parameters!");
+        Res.insert(Formals[Idx]); // corresponding formal
+      }
+    }
+    return Res;
   }
 }; // namespace psr
 
@@ -237,6 +261,7 @@ private:
   const llvm::Function *CalleeFun;
   const llvm::ReturnInst *ExitInst;
   bool PropagateGlobals;
+  const bool PropagateZeroToCaller;
   std::vector<const llvm::Value *> Actuals;
   std::vector<const llvm::Value *> Formals;
   std::function<bool(const llvm::Value *)> ParamPredicate;
@@ -249,10 +274,12 @@ public:
       std::function<bool(const llvm::Value *)> ParamPredicate =
           [](const llvm::Value *) { return true; },
       std::function<bool(const llvm::Function *)> ReturnPredicate =
-          [](const llvm::Function *) { return true; })
+          [](const llvm::Function *) { return true; },
+      bool PropagateZeroToCaller = true)
       : CallSite(CallSite), CalleeFun(CalleeFun),
         ExitInst(llvm::dyn_cast<llvm::ReturnInst>(ExitInst)),
         PropagateGlobals(PropagateGlobals),
+        PropagateZeroToCaller(PropagateZeroToCaller),
         ParamPredicate(std::move(ParamPredicate)),
         ReturnPredicate(std::move(ReturnPredicate)) {
     assert(ExitInst && "Should not be null");
@@ -272,12 +299,16 @@ public:
   container_type computeTargets(const llvm::Value *Source) override {
     assert(!CalleeFun->isDeclaration() &&
            "Cannot perform mapping to caller for function declaration");
-    // Pass ZeroValue as is
+    // Pass ZeroValue as is, if desired
     if (LLVMZeroValue::getInstance()->isLLVMZeroValue(Source)) {
-      return {Source};
+      if (PropagateZeroToCaller) {
+        return {Source};
+      }
+      return {};
     }
     // Pass global variables as is, if desired
-    if (PropagateGlobals && llvm::isa<llvm::GlobalVariable>(Source)) {
+    // Need llvm::Constant here to cover also ConstantExpr and ConstantAggregate
+    if (PropagateGlobals && llvm::isa<llvm::Constant>(Source)) {
       return {Source};
     }
     // Do the parameter mapping
@@ -318,7 +349,8 @@ public:
       }
     }
     // Collect return value facts
-    if (Source == ExitInst->getReturnValue() && ReturnPredicate(CalleeFun)) {
+    if (ExitInst != nullptr && Source == ExitInst->getReturnValue() &&
+        ReturnPredicate(CalleeFun)) {
       Res.insert(CallSite);
     }
     return Res;

@@ -82,18 +82,25 @@ private:
   Identity() = default;
 };
 
-template <typename D, typename Container = std::set<D>>
+template <typename D, typename Fn, typename Container = std::set<D>>
 class LambdaFlow : public FlowFunction<D, Container> {
 public:
   using typename FlowFunction<D, Container>::container_type;
 
-  LambdaFlow(std::function<container_type(D)> F) : Flow(std::move(F)) {}
+  LambdaFlow(Fn &&Flowfunc) : Flow(std::move(Flowfunc)) {}
+  LambdaFlow(const Fn &Flowfunc) : Flow(Flowfunc) {}
   virtual ~LambdaFlow() = default;
   container_type computeTargets(D Source) override { return Flow(Source); }
 
 private:
-  std::function<container_type(D)> Flow;
+  Fn Flow;
 };
+
+template <typename D, typename Fn, typename Container = std::set<D>>
+typename FlowFunction<D>::FlowFunctionPtrType makeLambdaFlow(Fn &&fn) {
+  return std::make_shared<LambdaFlow<D, std::decay_t<Fn>, Container>>(
+      std::forward<Fn>(fn));
+}
 
 template <typename D, typename Container = std::set<D>>
 class Compose : public FlowFunction<D, Container> {

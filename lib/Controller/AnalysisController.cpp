@@ -20,6 +20,7 @@
 #include "phasar/DB/ProjectIRDB.h"
 #include "phasar/PhasarLLVM/AnalysisStrategy/Strategies.h"
 #include "phasar/PhasarLLVM/AnalysisStrategy/WholeProgramAnalysis.h"
+#include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDEExtendedTaintAnalysis.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDEInstInteractionAnalysis.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDELinearConstantAnalysis.h"
 #include "phasar/PhasarLLVM/DataFlowSolver/IfdsIde/Problems/IDEProtoAnalysis.h"
@@ -77,16 +78,17 @@ bool needsToEmitPTA(AnalysisControllerEmitterOptions EmitterOptions) {
 AnalysisController::AnalysisController(
     ProjectIRDB &IRDB, std::vector<DataFlowAnalysisKind> DataFlowAnalyses,
     std::vector<std::string> AnalysisConfigs, PointerAnalysisType PTATy,
-    CallGraphAnalysisType CGTy, Soundness S,
-    const std::set<std::string> &EntryPoints, AnalysisStrategy Strategy,
-    AnalysisControllerEmitterOptions EmitterOptions,
+    CallGraphAnalysisType CGTy, Soundness SoundnessLevel,
+    bool AutoGlobalSupport, const std::set<std::string> &EntryPoints,
+    AnalysisStrategy Strategy, AnalysisControllerEmitterOptions EmitterOptions,
     const std::string &ProjectID, const std::string &OutDirectory)
     : IRDB(IRDB), TH(IRDB), PT(IRDB, !needsToEmitPTA(EmitterOptions), PTATy),
-      ICF(IRDB, CGTy, EntryPoints, &TH, &PT),
+      ICF(IRDB, CGTy, EntryPoints, &TH, &PT, SoundnessLevel, AutoGlobalSupport),
       DataFlowAnalyses(std::move(DataFlowAnalyses)),
       AnalysisConfigs(std::move(AnalysisConfigs)), EntryPoints(EntryPoints),
       Strategy(Strategy), EmitterOptions(EmitterOptions), ProjectID(ProjectID),
-      OutDirectory(OutDirectory), S(S) {
+      OutDirectory(OutDirectory), SoundnessLevel(SoundnessLevel),
+      AutoGlobalSupport(AutoGlobalSupport) {
   if (!OutDirectory.empty()) {
     // create directory for results
     ResultDirectory = OutDirectory + "/" + ProjectID + "-" + createTimeStamp();
@@ -132,6 +134,12 @@ void AnalysisController::executeWholeProgram() {
     std::string AnalysisConfigPath =
         (ConfigIdx < AnalysisConfigs.size()) ? AnalysisConfigs[ConfigIdx] : "";
     if (std::holds_alternative<DataFlowAnalysisType>(_DataFlowAnalysis)) {
+      auto getTaintConfig = [&]() {
+        if (!AnalysisConfigPath.empty()) {
+          return TaintConfig(IRDB, parseTaintConfig(AnalysisConfigPath));
+        }
+        return TaintConfig(IRDB);
+      };
       auto DataFlowAnalysis = std::get<DataFlowAnalysisType>(_DataFlowAnalysis);
       switch (DataFlowAnalysis) {
       case DataFlowAnalysisType::IFDSUninitializedVariables: {
@@ -150,18 +158,33 @@ void AnalysisController::executeWholeProgram() {
         WPA.releaseAllHelperAnalyses();
       } break;
       case DataFlowAnalysisType::IFDSTaintAnalysis: {
+        auto Config = getTaintConfig();
         WholeProgramAnalysis<IFDSSolver_P<IFDSTaintAnalysis>, IFDSTaintAnalysis>
-            WPA(IRDB, AnalysisConfigPath, EntryPoints, &PT, &ICF, &TH);
+            WPA(IRDB, &Config, EntryPoints, &PT, &ICF, &TH);
+        WPA.solve();
+        emitRequestedDataFlowResults(WPA);
+        WPA.releaseAllHelperAnalyses();
+      } break;
+      case DataFlowAnalysisType::IDEExtendedTaintAnalysis: {
+        auto Config = getTaintConfig();
+        WholeProgramAnalysis<IDESolver_P<IDEExtendedTaintAnalysis<>>,
+                             IDEExtendedTaintAnalysis<>>
+            WPA(IRDB, &Config, EntryPoints, &PT, &ICF, &TH);
         WPA.solve();
         emitRequestedDataFlowResults(WPA);
         WPA.releaseAllHelperAnalyses();
       } break;
       case DataFlowAnalysisType::IDETaintAnalysis: {
-        WholeProgramAnalysis<IDESolver_P<IDETaintAnalysis>, IDETaintAnalysis>
-            WPA(IRDB, EntryPoints, &PT, &ICF, &TH);
-        WPA.solve();
-        emitRequestedDataFlowResults(WPA);
-        WPA.releaseAllHelperAnalyses();
+        /// TODO: The IDETaintAnalysis seems not to be implemented at all.
+        /// So, keep the error-message until we have an implementation
+
+        // WholeProgramAnalysis<IDESolver_P<IDETaintAnalysis>, IDETaintAnalysis>
+        //     WPA(IRDB, EntryPoints, &PT, &ICF, &TH);
+        // WPA.solve();
+        // emitRequestedDataFlowResults(WPA);
+        // WPA.releaseAllHelperAnalyses();
+        std::cerr << "The IDETaintAnalysis is currently not available! Please "
+                     "use one of the other taint analyses.\n";
       } break;
       case DataFlowAnalysisType::IDEOpenSSLTypeStateAnalysis: {
         OpenSSLEVPKDFDescription TSDesc;
@@ -171,7 +194,6 @@ void AnalysisController::executeWholeProgram() {
         WPA.solve();
         emitRequestedDataFlowResults(WPA);
         WPA.releaseAllHelperAnalyses();
-        WPA.releaseConfiguration();
       } break;
       case DataFlowAnalysisType::IDECSTDIOTypeStateAnalysis: {
         CSTDFILEIOTypeStateDescription TSDesc;
@@ -181,7 +203,6 @@ void AnalysisController::executeWholeProgram() {
         WPA.solve();
         emitRequestedDataFlowResults(WPA);
         WPA.releaseAllHelperAnalyses();
-        WPA.releaseConfiguration();
       } break;
       case DataFlowAnalysisType::IFDSTypeAnalysis: {
         WholeProgramAnalysis<IFDSSolver_P<IFDSTypeAnalysis>, IFDSTypeAnalysis>
@@ -206,9 +227,10 @@ void AnalysisController::executeWholeProgram() {
         WPA.releaseAllHelperAnalyses();
       } break;
       case DataFlowAnalysisType::IFDSFieldSensTaintAnalysis: {
+        auto Config = getTaintConfig();
         WholeProgramAnalysis<IFDSSolver_P<IFDSFieldSensTaintAnalysis>,
                              IFDSFieldSensTaintAnalysis>
-            WPA(IRDB, AnalysisConfigPath, EntryPoints, &PT, &ICF, &TH);
+            WPA(IRDB, &Config, EntryPoints, &PT, &ICF, &TH);
         WPA.solve();
         emitRequestedDataFlowResults(WPA);
         WPA.releaseAllHelperAnalyses();
@@ -262,9 +284,10 @@ void AnalysisController::executeWholeProgram() {
         WPA.releaseAllHelperAnalyses();
       } break;
       case DataFlowAnalysisType::InterMonoTaintAnalysis: {
+        auto Config = getTaintConfig();
         WholeProgramAnalysis<InterMonoSolver_P<InterMonoTaintAnalysis, 3>,
                              InterMonoTaintAnalysis>
-            WPA(IRDB, AnalysisConfigPath, EntryPoints, &PT, &ICF, &TH);
+            WPA(IRDB, &Config, EntryPoints, &PT, &ICF, &TH);
         WPA.solve();
         emitRequestedDataFlowResults(WPA);
         WPA.releaseAllHelperAnalyses();

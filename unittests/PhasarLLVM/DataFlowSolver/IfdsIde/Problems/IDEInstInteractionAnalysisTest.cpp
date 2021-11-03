@@ -247,6 +247,10 @@ TEST_F(IDEInstInteractionAnalysisTest, HandleBasicTest_03) {
 }
 
 TEST_F(IDEInstInteractionAnalysisTest, HandleBasicTest_04) {
+// If we use libcxx this won't work since internal implementation is different
+#ifdef _LIBCPP_VERSION
+  GTEST_SKIP();
+#endif
   std::set<IIACompactResult_t> GroundTruth;
   GroundTruth.emplace(
       std::tuple<std::string, size_t, std::string, BitVectorSet<std::string>>(
@@ -432,7 +436,7 @@ TEST_F(IDEInstInteractionAnalysisTest, HandleCallTest_05) {
   GroundTruth.emplace(
       std::tuple<std::string, size_t, std::string, BitVectorSet<std::string>>(
           "main", 10, "j", {"1", "7", "10", "12", "13"}));
-  doAnalysisAndCompareResults("call_05_cpp.ll", GroundTruth, false);
+  doAnalysisAndCompareResults("call_05_cpp.ll", GroundTruth, true);
 }
 
 TEST_F(IDEInstInteractionAnalysisTest, HandleCallTest_06) {
@@ -465,7 +469,7 @@ TEST_F(IDEInstInteractionAnalysisTest, HandleGlobalTest_01) {
           "main", 9, "i", {"0", "7", "8"}));
   GroundTruth.emplace(
       std::tuple<std::string, size_t, std::string, BitVectorSet<std::string>>(
-          "main", 9, "j", {"2", "6"}));
+          "main", 9, "j", {"2", "5", "6"}));
   doAnalysisAndCompareResults("global_01_cpp.ll", GroundTruth, false);
 }
 
@@ -488,7 +492,7 @@ TEST_F(IDEInstInteractionAnalysisTest, HandleGlobalTest_02) {
           "main", 12, "retval", {"4", "6"}));
   GroundTruth.emplace(
       std::tuple<std::string, size_t, std::string, BitVectorSet<std::string>>(
-          "main", 12, "c", {"5", "8", "13"}));
+          "main", 12, "c", {"5", "8", "7", "13"}));
   doAnalysisAndCompareResults("global_02_cpp.ll", GroundTruth, false);
 }
 
@@ -544,6 +548,10 @@ TEST_F(IDEInstInteractionAnalysisTest, HandleHeapTest_01) {
 }
 
 TEST_F(IDEInstInteractionAnalysisTest, HandleRVOTest_01) {
+// If we use libcxx this won't work since internal implementation is different
+#ifdef _LIBCPP_VERSION
+  GTEST_SKIP();
+#endif
   std::set<IIACompactResult_t> GroundTruth;
   GroundTruth.emplace(
       std::tuple<std::string, size_t, std::string, BitVectorSet<std::string>>(
