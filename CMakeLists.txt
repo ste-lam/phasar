@@ -14,6 +14,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS YES)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+include(GNUInstallDirs)
+
 set_property(GLOBAL PROPERTY TARGET_MESSAGES OFF)
 
 # Set up the various build types
@@ -102,7 +105,10 @@ include_directories(
   ${PHASAR_SRC_DIR}/include
 )
 
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+set(PHASAR_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR}/phasar)
+
+set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${PHASAR_INSTALL_LIBDIR})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if (LLVM_ENABLE_LIBCXX)
@@ -123,10 +129,35 @@ include_directories(${Boost_INCLUDE_DIRS})
 # Disable clang-tidy for the external projects
 set(CMAKE_CXX_CLANG_TIDY "")
 
-# JSON library
-option(JSON_BuildTests OFF)
-add_subdirectory(external/json EXCLUDE_FROM_ALL)
+# We need to work around the behavior of nlohmann_json_schema_validator and nlohmann_json here
+# The validator needs the json part, but if you include it, the library of nlohmann_json_schema_validator
+# is not installed, leading to linker error. But just including nlohmann_json is not sufficient, as
+# in the installed state the nlohmann_json_schema_validator needs the nlohmann_json package which needs
+# to be installed.
+# The following workaround may collapse or become unnecessary once the issue is
+# changed or fixed in nlohmann_json_schema_validator.
+
+#Override option of nlohmann_json_schema_validator to not build its tests
+set(BUILD_TESTS OFF CACHE BOOL "Build json-schema-validator-tests")
+
+# Make nlohmann_json_schema_validator happy by telling it how to find the single include of nlohmann_json
 include_directories(external/json/single_include/)
+
+if (PHASAR_IN_TREE)
+  set_property(GLOBAL APPEND PROPERTY LLVM_EXPORTS nlohmann_json_schema_validator)
+endif()
+
+set(nlohmann_json_DIR ${PHASAR_SRC_DIR}/external/json/single_include/)
+
+# Json Schema Validator
+set(JSON_VALIDATOR_INSTALL ON)
+add_subdirectory(external/json-schema-validator)
+include_directories(external/json-schema-validator/src/)
+
+# now we finally add the subdirectory
+set(JSON_BuildTests OFF)
+set(JSON_Install ON)
+add_subdirectory(external/json)
 
 # Googletest
 if(NOT PHASAR_IN_TREE)
@@ -165,7 +196,7 @@ endif()
 # Clang
 # The clang-cpp shared library is now the preferred way to link dynamically against libclang if we build out of tree.
 if(NOT PHASAR_IN_TREE)
-  find_library(CLANG_LIBRARY NAMES clang-cpp REQUIRED HINTS ${LLVM_LIBRARY_DIRS})
+  find_library(CLANG_LIBRARY NAMES clang-cpp libclang-cpp REQUIRED HINTS ${LLVM_LIBRARY_DIRS})
   if(${CLANG_LIBRARY} STREQUAL "CLANG_LIBRARY-NOTFOUND")
     set(NEED_LIBCLANG_COMPONENT_LIBS on)
   endif()
