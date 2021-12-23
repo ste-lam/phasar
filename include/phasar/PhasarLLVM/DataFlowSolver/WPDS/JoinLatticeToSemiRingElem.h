@@ -37,7 +37,9 @@ public:
       : wali::SemElem(), EdgeFunc(F), Lattice(L) {}
   ~JoinLatticeToSemiRingElem() override = default;
 
-  std::ostream &print(std::ostream &OS) const override { return OS << *EdgeFunc; }
+  std::ostream &print(std::ostream &OS) const override {
+    return OS << *EdgeFunc;
+  }
 
   [[nodiscard]] wali::sem_elem_t one() const override {
     // std::cout << "JoinLatticeToSemiRingElem::one()" << std::endl;
@@ -58,7 +60,8 @@ public:
     auto ThisF = static_cast<JoinLatticeToSemiRingElem *>(this);
     auto ThatF = static_cast<JoinLatticeToSemiRingElem *>(SE);
     return wali::ref_ptr<JoinLatticeToSemiRingElem<V>>(
-        new JoinLatticeToSemiRingElem(ThisF->F->composeWith(ThatF->F), Lattice));
+        new JoinLatticeToSemiRingElem(ThisF->F->composeWith(ThatF->F),
+                                      Lattice));
   }
 
   [[nodiscard]] wali::sem_elem_t combine(SemElem *SE) override {
