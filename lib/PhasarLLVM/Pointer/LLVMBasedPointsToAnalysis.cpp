@@ -67,7 +67,7 @@ static inline void printModRefResults(const char *Msg, bool P,
 static inline void printModRefResults(const char *Msg, bool P,
                                       const llvm::CallBase *CallA,
                                       const llvm::CallBase *CallB,
-                                      const llvm::Module */*M*/) {
+                                      const llvm::Module * /*M*/) {
   if (P) {
     llvm::errs() << "  " << Msg << ": " << *CallA << " <-> " << *CallB << '\n';
   }
@@ -76,7 +76,7 @@ static inline void printModRefResults(const char *Msg, bool P,
 static inline void printLoadStoreResults(llvm::AliasResult AR, bool P,
                                          const llvm::Value *V1,
                                          const llvm::Value *V2,
-                                         const llvm::Module */*M*/) {
+                                         const llvm::Module * /*M*/) {
   if (P) {
     llvm::errs() << "  " << AR << ": " << *V1 << " <-> " << *V2 << '\n';
   }
