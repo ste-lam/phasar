@@ -94,8 +94,9 @@ LazyTypeGraph::getTypes(const llvm::StructType *StructType) {
 
   boost::depth_first_visit(
       Graph, StructTyVertex, Vis,
-      boost::make_iterator_property_map(
-          ColorMap.begin(), boost::get(boost::vertex_index, Graph), ColorMap[0]));
+      boost::make_iterator_property_map(ColorMap.begin(),
+                                        boost::get(boost::vertex_index, Graph),
+                                        ColorMap[0]));
 
   return Results;
 }
