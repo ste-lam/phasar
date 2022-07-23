@@ -634,7 +634,7 @@ bool LLVMPointsToSet::isInReachableAllocationSites(
 }
 
 void LLVMPointsToSet::mergeWith(const PointsToInfo &PTI) {
-  const auto *OtherPTI = dynamic_cast<const LLVMPointsToSet *>(&PTI);
+  const auto *OtherPTI = static_cast<const LLVMPointsToSet *>(&PTI);
   if (!OtherPTI) {
     llvm::report_fatal_error(
         "LLVMPointsToSet can only be merged with another LLVMPointsToSet!");

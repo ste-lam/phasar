@@ -32,6 +32,9 @@ target_link_libraries(phasar_pointer
   ${Boost_LIBRARIES}
 )
 
+set_source_files_properties(LLVMPointsToSet.cpp PROPERTIES COMPILE_FLAGS -fno-rtti)
+
+
 set_target_properties(phasar_pointer
   PROPERTIES
   LINKER_LANGUAGE CXX
