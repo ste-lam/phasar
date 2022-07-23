@@ -65,11 +65,13 @@ const llvm::StructType *getReceiverType(const llvm::CallBase *CallSite) {
     return nullptr;
   }
 
+#if LLVM_VERSION_MAJOR >= 13
   if (Receiver->getType()->isOpaquePointerTy()) {
     llvm::errs() << "WARNING: The IR under analysis uses opaque pointers, "
                     "which are not supported by phasar yet!\n";
     return nullptr;
   }
+#endif
 
   if (const auto *ReceiverTy = llvm::dyn_cast<llvm::StructType>(
           Receiver->getType()->getPointerElementType())) {
